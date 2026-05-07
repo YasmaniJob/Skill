@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { Monitor, Mail, Lock, Loader2 } from 'lucide-react';
+import { Monitor, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { showErrorToast } from '../lib/errorUtils';
+import { showErrorToast, getErrorMessage } from '../lib/errorUtils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
@@ -19,12 +20,14 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      setAuthError(null);
       await login(email, password);
       toast.success('¡Bienvenido de nuevo!');
       navigate('/');
     } catch (error) {
       console.error(error);
-      showErrorToast(error, 'Error al iniciar sesión');
+      const message = showErrorToast(error, 'Error al iniciar sesión');
+      setAuthError(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +94,13 @@ const Login = () => {
                 'Iniciar Sesión'
               )}
             </button>
+
+            {authError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-600 text-xs font-bold animate-shake">
+                <AlertCircle className="w-4 h-4" />
+                {authError}
+              </div>
+            )}
           </form>
           
           <div className="mt-8 pt-6 border-t border-slate-50">
