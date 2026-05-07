@@ -1,4 +1,4 @@
-# MonitorED - Monitoreo Pedagógico Docente 2026
+# Skill - Gestión Pedagógica y Monitoreo 2026
 
 Aplicación web para el seguimiento y monitoreo del desempeño docente en instituciones educativas del Perú.
 

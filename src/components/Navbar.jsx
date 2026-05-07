@@ -44,7 +44,7 @@ const Navbar = () => {
               <div className="p-1.5 bg-sky-600 rounded-lg group-hover:bg-sky-700 transition-colors">
                 <Monitor className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-extrabold text-sky-700 tracking-tight">MonitorED</span>
+              <span className="text-xl font-extrabold text-sky-700 tracking-tight">Skill</span>
             </Link>
 
             {/* Nav links */}

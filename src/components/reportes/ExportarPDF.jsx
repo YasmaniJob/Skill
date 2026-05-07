@@ -9,7 +9,7 @@ const ExportarPDF = ({ monitoreos }) => {
     // Encabezado
     doc.setFontSize(18);
     doc.setTextColor(15, 23, 42); // slate-900
-    doc.text('MonitorED — Reporte de Monitoreo Docente 2026', 14, 20);
+    doc.text('Skill — Reporte de Gestión Pedagógica 2026', 14, 20);
     
     doc.setFontSize(10);
     doc.setTextColor(100, 116, 139); // slate-500
@@ -54,7 +54,7 @@ const ExportarPDF = ({ monitoreos }) => {
       doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
     }
 
-    doc.save(`Reporte_MonitorED_${new Date().getTime()}.pdf`);
+    doc.save(`Reporte_Skill_${new Date().getTime()}.pdf`);
   };
 
   return (

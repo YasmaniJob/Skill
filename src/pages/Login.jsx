@@ -40,8 +40,8 @@ const Login = () => {
           <div className="inline-flex p-3 bg-primary-600 rounded-2xl mb-4 animate-bounce">
             <Monitor className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">MonitorED</h1>
-          <p className="mt-2 text-slate-500">Monitoreo Pedagógico Docente 2026</p>
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Skill</h1>
+          <p className="mt-2 text-slate-500">Gestión Pedagógica y Monitoreo 2026</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 border border-slate-100">

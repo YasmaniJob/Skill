@@ -46,7 +46,7 @@ const Sidebar = () => {
           <div className="p-2 bg-sky-600 rounded-xl group-hover:bg-sky-700 transition-colors">
             <Monitor className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-black text-slate-800 tracking-tight">MonitorED</span>
+          <span className="text-xl font-black text-slate-800 tracking-tight">Skill</span>
         </Link>
         <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600">
           <X className="w-6 h-6" />
@@ -109,7 +109,7 @@ const Sidebar = () => {
           <div className="p-1.5 bg-sky-600 rounded-lg">
             <Monitor className="w-5 h-5 text-white" />
           </div>
-          <span className="font-black text-slate-800 tracking-tight">MonitorED</span>
+          <span className="font-black text-slate-800 tracking-tight">Skill</span>
         </div>
         <button 
           onClick={() => setIsOpen(true)}

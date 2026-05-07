@@ -1,5 +1,5 @@
 -- ============================================================
--- MonitorED — Schema completo con roles y periodos de monitoreo
+-- Skill — Schema completo con roles y periodos de monitoreo
 -- ============================================================
 
 -- 1. Tabla de perfiles (roles por usuario)
