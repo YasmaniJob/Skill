@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { usePeriodos } from '../../hooks/usePeriodos';
 import { useMonitoreos } from '../../hooks/useMonitoreos';
 import { useDocentes } from '../../hooks/useDocentes';
+import { toast } from 'react-hot-toast';
 import Select from 'react-select';
 import { AREAS } from '../../data/areas';
 import { GRADOS } from '../../data/grados';
@@ -81,7 +82,7 @@ const FormularioMonitoreo = () => {
     e.preventDefault();
     const allScored = INDICADORES.every(ind => formData[ind.id] > 0);
     if (!allScored) {
-      alert('Por favor califique todos los indicadores antes de guardar.');
+      toast.error('Por favor califique todos los indicadores antes de guardar.');
       return;
     }
     setIsSubmitting(true);

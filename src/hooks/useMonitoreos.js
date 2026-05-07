@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './useAuth.jsx';
 import { toast } from 'react-hot-toast';
+import { showErrorToast } from '../lib/errorUtils';
 
 export const useMonitoreos = (filters = {}) => {
   const [monitoreos, setMonitoreos] = useState([]);
@@ -34,7 +35,7 @@ export const useMonitoreos = (filters = {}) => {
       setMonitoreos(data || []);
     } catch (error) {
       console.error('Error fetching monitoreos:', error);
-      toast.error('Error al cargar los registros');
+      showErrorToast(error, 'Error al cargar los registros');
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ export const useMonitoreos = (filters = {}) => {
       return true;
     } catch (error) {
       console.error(error);
-      toast.error('Error al guardar el registro');
+      showErrorToast(error, 'Error al guardar el registro');
       return false;
     }
   };
@@ -81,7 +82,7 @@ export const useMonitoreos = (filters = {}) => {
       return true;
     } catch (error) {
       console.error(error);
-      toast.error('No tienes permiso para eliminar este registro');
+      showErrorToast(error, 'No tienes permiso para eliminar este registro');
       return false;
     }
   };

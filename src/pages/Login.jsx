@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Monitor, Mail, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { showErrorToast } from '../lib/errorUtils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -23,11 +24,7 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       console.error(error);
-      let message = 'Error al iniciar sesión. Por favor, verifica tus credenciales.';
-      if (error.message === 'Invalid login credentials') {
-        message = 'Email o contraseña incorrectos.';
-      }
-      toast.error(message);
+      showErrorToast(error, 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }
