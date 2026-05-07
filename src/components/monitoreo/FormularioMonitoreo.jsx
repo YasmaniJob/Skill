@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePeriodos } from '../../hooks/usePeriodos';
 import { useMonitoreos } from '../../hooks/useMonitoreos';
 import { useDocentes } from '../../hooks/useDocentes';
@@ -16,13 +16,13 @@ import {
 import { clsx } from 'clsx';
 
 const NIVEL_GLOW = {
-  1: 'shadow-[0_0_15px_rgba(239,68,68,0.1)] border-red-500/30',
-  2: 'shadow-[0_0_15px_rgba(245,158,11,0.1)] border-amber-500/30',
-  3: 'shadow-[0_0_15px_rgba(59,130,246,0.1)] border-blue-500/30',
-  4: 'shadow-[0_0_15px_rgba(16,185,129,0.1)] border-emerald-500/30',
+  1: 'shadow-[0_0_15px_rgba(239,68,68,0.05)] border-red-500/20',
+  2: 'shadow-[0_0_15px_rgba(245,158,11,0.05)] border-amber-500/20',
+  3: 'shadow-[0_0_15px_rgba(59,130,246,0.05)] border-blue-500/20',
+  4: 'shadow-[0_0_15px_rgba(16,185,129,0.05)] border-emerald-500/20',
 };
 
-const FormularioMonitoreo = () => {
+const FormularioMonitoreo = ({ externalPeriodoId }) => {
   const { periodosActivos, loading: loadingPeriodos } = usePeriodos();
   const { addMonitoreo } = useMonitoreos();
   const { docentes, loading: loadingDocentes } = useDocentes();
@@ -65,6 +65,13 @@ const FormularioMonitoreo = () => {
 
   const [formData, setFormData] = useState(emptyForm);
 
+  // Sincronizar con el periodo del Header
+  useEffect(() => {
+    if (externalPeriodoId) {
+      setFormData(prev => ({ ...prev, periodo_id: externalPeriodoId }));
+    }
+  }, [externalPeriodoId]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -104,28 +111,10 @@ const FormularioMonitoreo = () => {
   }
 
   return (
-    <div className="bg-[#121316] rounded-lg border border-white/10 overflow-hidden text-[#eeeeee]">
-      <div className="p-8 border-b border-white/5 bg-white/[0.02]">
-        <h2 className="text-xl font-bold text-white flex items-center gap-3">
-          <ClipboardList className="w-5 h-5 text-[#5e6ad2]" />
-          Nuevo Registro de Monitoreo
-        </h2>
-        <p className="text-sm text-slate-500 mt-1">Ingrese la información detallada de la sesión observada.</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="p-8 space-y-10">
+    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden text-slate-900 shadow-none">
+      <form onSubmit={handleSubmit} className="p-10 space-y-12">
         {/* Info Box */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-white/[0.01] p-6 border border-white/5 rounded-lg">
-          <div className="md:col-span-1 space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <CalendarRange className="w-3 h-3" /> Periodo
-            </label>
-            <select name="periodo_id" required value={formData.periodo_id} onChange={handleInputChange} className="input-field">
-              <option value="">Seleccionar...</option>
-              {periodosActivos.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-            </select>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/[0.01] p-6 border border-white/5 rounded-lg">
           <div className="md:col-span-2 space-y-2">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
               <User className="w-3 h-3" /> Buscar Docente
@@ -140,16 +129,16 @@ const FormularioMonitoreo = () => {
               styles={{
                 control: (base) => ({
                   ...base,
-                  backgroundColor: '#121316',
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e5e7eb',
                   borderRadius: '0.375rem',
-                  color: '#eeeeee',
-                  '&:hover': { borderColor: 'rgba(255, 255, 255, 0.2)' }
+                  color: '#111827',
+                  '&:hover': { borderColor: '#d1d5db' }
                 }),
-                menu: (base) => ({ ...base, backgroundColor: '#1a1b1e', border: '1px solid rgba(255, 255, 255, 0.1)' }),
-                option: (base, { isFocused }) => ({ ...base, backgroundColor: isFocused ? '#5e6ad2' : 'transparent', color: isFocused ? 'white' : '#eeeeee' }),
-                singleValue: (base) => ({ ...base, color: '#eeeeee' }),
-                input: (base) => ({ ...base, color: '#eeeeee' })
+                menu: (base) => ({ ...base, backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }),
+                option: (base, { isFocused }) => ({ ...base, backgroundColor: isFocused ? '#4f46e5' : 'transparent', color: isFocused ? 'white' : '#111827' }),
+                singleValue: (base) => ({ ...base, color: '#111827' }),
+                input: (base) => ({ ...base, color: '#111827' })
               }}
               value={formData.dni_docente ? docenteOptions.find(o => o.value === formData.dni_docente) : null}
             />
@@ -157,14 +146,14 @@ const FormularioMonitoreo = () => {
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="w-3 h-3" /> Fecha
+              <Calendar className="w-3 h-3" /> Fecha de Observación
             </label>
             <input type="date" name="fecha" required value={formData.fecha} onChange={handleInputChange} className="input-field" />
           </div>
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <BookOpen className="w-3 h-3" /> Área
+              <BookOpen className="w-3 h-3" /> Área Curricular
             </label>
             <select name="area" required value={formData.area} onChange={handleInputChange} className="input-field">
               <option value="">Área...</option>
@@ -196,8 +185,8 @@ const FormularioMonitoreo = () => {
         {/* Indicadores */}
         <div className="space-y-12">
           <div className="flex items-center gap-3">
-            <div className="h-4 w-1 bg-[#5e6ad2] rounded-full" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest">Rúbricas de Desempeño</h3>
+            <div className="h-4 w-1 bg-[#4f46e5] rounded-full" />
+            <h3 className="text-[11px] font-bold text-slate-900 uppercase tracking-[0.2em]">Rúbricas de Desempeño</h3>
           </div>
 
           <div className="space-y-10">
@@ -205,7 +194,7 @@ const FormularioMonitoreo = () => {
               <div key={ind.id} className="space-y-4">
                 <div className="flex items-start gap-4">
                   <span className="flex-shrink-0 text-xs font-bold text-slate-600 mt-0.5">0{idx + 1}</span>
-                  <p className="text-sm font-semibold text-slate-300 leading-relaxed">{ind.nombre}</p>
+                  <p className="text-sm font-semibold text-slate-700 leading-relaxed">{ind.nombre}</p>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-8">
@@ -219,11 +208,11 @@ const FormularioMonitoreo = () => {
                         className={clsx(
                           'flex flex-col items-center p-3 rounded-md border transition-all duration-200',
                           isSelected
-                            ? `${NIVELES[valor].color.replace('bg-', 'bg-').replace('600', '500/20')} ${NIVELES[valor].border.replace('border-', 'border-').replace('500', '500/50')} text-white ring-1 ring-[#5e6ad2]/30 ${NIVEL_GLOW[valor]}`
-                            : 'border-white/5 bg-white/[0.02] text-slate-500 hover:border-white/10 hover:bg-white/[0.04]'
+                            ? `${NIVELES[valor].color.replace('bg-', 'bg-').replace('600', '500/10')} ${NIVELES[valor].border.replace('border-', 'border-').replace('500', '500/40')} text-slate-900 ring-1 ring-[#4f46e5]/20 ${NIVEL_GLOW[valor]}`
+                            : 'border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 hover:bg-slate-50'
                         )}
                       >
-                        <span className={clsx("text-xl font-bold", isSelected ? "text-white" : "text-slate-600")}>{valor}</span>
+                        <span className={clsx("text-xl font-bold", isSelected ? "text-slate-900" : "text-slate-300")}>{valor}</span>
                         <span className="text-[9px] uppercase font-bold tracking-widest mt-1 opacity-60">
                           {NIVELES[valor].etiqueta}
                         </span>

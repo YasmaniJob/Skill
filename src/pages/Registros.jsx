@@ -4,11 +4,15 @@ const Registros = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Historial de Registros</h1>
-        <p className="text-sm text-slate-500 mt-1 uppercase font-medium tracking-widest">Gestión de monitoreos realizados</p>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">Monitoreos</h1>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">
+          Historial y gestión de observaciones realizadas
+        </p>
       </div>
       
-      <TablaMonitoreos />
+      <div className="w-full">
+        <TablaMonitoreos />
+      </div>
     </div>
   );
 };

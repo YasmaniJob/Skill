@@ -9,28 +9,40 @@ const ResumenCards = ({ monitoreos }) => {
       title: 'Destacado', 
       value: `${kpis.n4}%`, 
       icon: TrendingUp, 
-      color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20', 
+      bgColor: 'bg-emerald-50', 
+      borderColor: 'border-emerald-100',
+      textColor: 'text-emerald-700',
+      iconColor: 'bg-emerald-500 text-white',
       desc: 'Nivel 4'
     },
     { 
       title: 'Suficiente', 
       value: `${kpis.n3}%`, 
       icon: CheckCircle2, 
-      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', 
+      bgColor: 'bg-blue-50', 
+      borderColor: 'border-blue-100',
+      textColor: 'text-blue-700',
+      iconColor: 'bg-blue-600 text-white',
       desc: 'Nivel 3'
     },
     { 
       title: 'En Proceso', 
       value: `${kpis.n2}%`, 
       icon: ClipboardList, 
-      color: 'bg-amber-500/10 text-amber-500 border-amber-500/20', 
+      bgColor: 'bg-amber-50', 
+      borderColor: 'border-amber-100',
+      textColor: 'text-amber-700',
+      iconColor: 'bg-amber-500 text-white',
       desc: 'Nivel 2'
     },
     { 
       title: 'Deficiente', 
       value: `${kpis.n1}%`, 
       icon: AlertTriangle, 
-      color: 'bg-red-500/10 text-red-500 border-red-500/20', 
+      bgColor: 'bg-red-50', 
+      borderColor: 'border-red-100',
+      textColor: 'text-red-700',
+      iconColor: 'bg-red-600 text-white',
       desc: 'Nivel 1'
     },
   ];
@@ -38,16 +50,25 @@ const ResumenCards = ({ monitoreos }) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card, i) => (
-        <div key={i} className="bg-[#121316] p-5 rounded-lg border border-white/10 flex flex-col gap-3 transition-all hover:border-white/20">
+        <div 
+          key={i} 
+          className={`p-4 rounded-lg border ${card.bgColor} ${card.borderColor} flex flex-col gap-3 transition-all`}
+        >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{card.title}</span>
-            <div className={`p-1.5 rounded border ${card.color}`}>
+            <span className={`text-[9px] font-black uppercase tracking-widest ${card.textColor} opacity-60`}>
+              {card.title}
+            </span>
+            <div className={`p-1 rounded ${card.iconColor}`}>
               <card.icon className="w-3.5 h-3.5" />
             </div>
           </div>
           <div>
-            <p className="text-2xl font-bold text-white tracking-tight">{card.value}</p>
-            <p className="text-[10px] font-medium text-slate-600 mt-0.5">{card.desc}</p>
+            <p className={`text-2xl font-black tracking-tighter ${card.textColor}`}>
+              {card.value}
+            </p>
+            <p className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${card.textColor} opacity-50`}>
+              {card.desc}
+            </p>
           </div>
         </div>
       ))}

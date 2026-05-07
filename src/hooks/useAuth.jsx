@@ -18,6 +18,14 @@ export const AuthProvider = ({ children }) => {
     setPerfil(data || null);
   };
 
+  // Permite refrescar el perfil en caliente sin recargar la sesión
+  const refreshPerfil = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.id) {
+      await fetchPerfil(session.user.id);
+    }
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -51,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   const esDirectivo = ['admin', 'director', 'subdirector'].includes(rol);
 
   return (
-    <AuthContext.Provider value={{ user, perfil, rol, esAdmin, esDirectivo, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, perfil, rol, esAdmin, esDirectivo, loading, login, logout, refreshPerfil }}>
       {children}
     </AuthContext.Provider>
   );

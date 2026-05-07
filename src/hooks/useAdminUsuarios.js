@@ -22,6 +22,14 @@ const adminClient = SERVICE_ROLE_KEY
     })
   : null;
 
+// Cliente temporal para signUp sin afectar la sesión actual
+const tempClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
+
 export const useAdminUsuarios = () => {
   const [loading, setLoading] = useState(false);
 
@@ -92,23 +100,22 @@ export const useAdminUsuarios = () => {
   };
 
   const resetPasswordToDNI = async (userId, dni) => {
-    if (!adminClient) {
-      toast.error('No se ha configurado el Service Role Key para esta acción.');
-      return false;
-    }
     setLoading(true);
     try {
-      const { error } = await adminClient.auth.admin.updateUserById(userId, { 
-        password: String(dni).padStart(8, '0'),
-        user_metadata: { password_reset: true }
+      // Llamamos a la función Postgres con SECURITY DEFINER
+      // Esto evita exponer el service role key en el browser
+      const { data, error } = await supabase.rpc('reset_password_to_dni', {
+        target_user_id: userId,
+        dni_value: String(dni),
       });
+
       if (error) throw error;
-      
-      await supabase.from('perfiles').update({ debe_cambiar_pass: true }).eq('id', userId);
-      
-      toast.success('Contraseña reseteada al DNI (8 dígitos)');
+      if (!data?.success) throw new Error(data?.error || 'Error desconocido');
+
+      toast.success('Contraseña reseteada al DNI. El usuario deberá cambiarla al ingresar.');
       return true;
     } catch (error) {
+      console.error('Error al resetear:', error);
       toast.error('Error al resetear: ' + error.message);
       return false;
     } finally {

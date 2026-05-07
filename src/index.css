@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #5e6ad2;
-  --color-surface: #08090a;
-  --color-card: #121316;
-  --color-border: rgba(255, 255, 255, 0.1);
+  --color-primary: #4f46e5;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --color-border: #e5e7eb;
 }
 
 :root {
@@ -12,9 +12,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: #eeeeee;
-  background-color: #08090a;
+  color-scheme: light;
+  color: #111827;
+  background-color: #fcfcfc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,32 +28,32 @@ body {
   min-height: 100vh;
 }
 
-/* Linear-style Scrollbar */
+/* Precise Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #e2e8f0;
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-[#5e6ad2] hover:bg-[#6b79e0] text-white font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    @apply bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-lg py-2 px-4 text-xs uppercase tracking-widest;
   }
 
   .input-field {
-    @apply w-full bg-[#121316] border border-white/10 rounded-md py-2 px-3 text-sm text-[#eeeeee] focus:outline-none focus:ring-1 focus:ring-[#5e6ad2] focus:border-[#5e6ad2] transition-all;
+    @apply w-full bg-white border border-slate-200 rounded-lg py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-[#4f46e5] transition-all placeholder:text-slate-400;
   }
 
   .card-linear {
-    @apply bg-[#121316] border border-white/10 rounded-lg shadow-2xl;
+    @apply bg-white border border-slate-200 rounded-lg shadow-none;
   }
+}
+
+/* Strictly Flat Style */
+* {
+  box-shadow: none !important;
 }

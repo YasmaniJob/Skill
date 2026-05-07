@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../hooks/useAuth.jsx';
 import { Lock, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -9,6 +10,7 @@ const CambiarPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { refreshPerfil } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,21 +32,22 @@ const CambiarPassword = () => {
 
       if (authError) throw authError;
 
-      // 2. Actualizar bandera en perfiles
-      const { error: profileError } = await supabase
-        .from('perfiles')
-        .update({ debe_cambiar_pass: false })
-        .eq('id', authData.user.id);
+      // 2. Marcar bandera via RPC (bypasa RLS para cualquier rol)
+      const { data: rpcData, error: profileError } = await supabase
+        .rpc('skip_password_change');
 
       if (profileError) throw profileError;
+      if (!rpcData?.success) throw new Error(rpcData?.error || 'Error al actualizar perfil');
 
+      // 3. Cerrar sesión para forzar login con nueva contraseña
       await supabase.auth.signOut();
-      toast.success('¡Contraseña actualizada! Por favor, inicia sesión nuevamente.');
-      navigate('/login');
+
+      toast.success('¡Contraseña actualizada! Inicia sesión con tu nueva contraseña.');
+      navigate('/login', { replace: true });
 
     } catch (error) {
       console.error(error);
-      toast.error('Error al actualizar la contraseña. Inténtelo de nuevo.');
+      toast.error('Error al actualizar la contraseña.');
     } finally {
       setLoading(false);
     }
@@ -53,88 +56,100 @@ const CambiarPassword = () => {
   const handleSkip = async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const { error: profileError } = await supabase
-        .from('perfiles')
-        .update({ debe_cambiar_pass: false })
-        .eq('id', session.user.id);
+      // RPC con SECURITY DEFINER: bypasa RLS para actualizar debe_cambiar_pass
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc('skip_password_change');
 
-      if (profileError) throw profileError;
+      if (rpcError) throw rpcError;
+      if (!rpcData?.success) throw new Error(rpcData?.error || 'Error al actualizar perfil');
 
-      // No cerramos sesión, los dejamos pasar directo al dashboard
-      window.location.href = '/'; 
+      // Refrescar perfil en contexto ANTES de navegar para evitar loop
+      await refreshPerfil();
+
+      navigate('/', { replace: true });
 
     } catch (error) {
       console.error(error);
-      toast.error('Error al omitir el paso.');
+      toast.error('Error al omitir: ' + error.message);
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl overflow-hidden border border-slate-100 p-8">
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
-            <ShieldCheck className="w-8 h-8 text-sky-600" />
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+      <div className="max-w-md w-full bg-white rounded-lg border border-slate-200 p-10">
+        <div className="flex justify-center mb-8">
+          <div className="p-4 bg-[#4f46e5]/10 rounded-lg">
+            <ShieldCheck className="w-10 h-10 text-[#4f46e5]" />
           </div>
         </div>
 
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Cambio de Contraseña</h2>
-          <p className="text-sm text-slate-500 mt-2">
-            Por seguridad, te recomendamos establecer una nueva contraseña personal. Si lo prefieres, puedes omitir este paso y seguir usando tu DNI.
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">Cambio de Contraseña</h2>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-4">
+            Seguridad de la Cuenta
+          </p>
+          <p className="text-xs text-slate-500 mt-4 leading-relaxed px-4">
+            Te recomendamos establecer una contraseña personal. Puedes omitir este paso y seguir usando tu DNI si lo prefieres.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-slate-400" /> Nueva Contraseña
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              Nueva Contraseña
             </label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium"
-              placeholder="Mínimo 6 caracteres"
-            />
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#4f46e5] transition-all"
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-slate-400" /> Confirmar Contraseña
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              Confirmar Contraseña
             </label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium"
-              placeholder="Repite tu nueva contraseña"
-            />
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#4f46e5] transition-all"
+                placeholder="Repite la contraseña"
+              />
+            </div>
           </div>
 
-          <div className="pt-4 space-y-3">
+          <div className="pt-6 space-y-4">
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]"
+              className="w-full py-4 bg-[#4f46e5] text-white font-black text-[11px] uppercase tracking-widest rounded-lg transition-all hover:bg-[#4338ca] disabled:opacity-50 flex items-center justify-center"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Guardar y Continuar'}
+              {loading
+                ? <Loader2 className="w-5 h-5 animate-spin" />
+                : 'Guardar y Continuar'
+              }
             </button>
-            
+
             <button
               type="button"
               onClick={handleSkip}
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 font-bold rounded-xl border border-slate-200 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-white text-slate-500 font-black text-[11px] uppercase tracking-widest rounded-lg border border-slate-200 transition-all hover:bg-slate-50 disabled:opacity-50"
             >
-              Omitir por ahora (Mantener DNI)
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Omitir por ahora'}
             </button>
           </div>
         </form>

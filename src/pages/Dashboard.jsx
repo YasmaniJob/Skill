@@ -56,40 +56,40 @@ const Dashboard = () => {
   const datosRanking = getRankingDocentes(monitoreos);
 
   return (
-    <div className="space-y-8 pb-12 text-[#eeeeee]">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+    <div className="space-y-8 pb-12 text-slate-900">
+      {/* Header Compact */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">Panel de Control</h1>
-            <p className="text-slate-500 font-medium text-xs mt-1 uppercase tracking-widest">Análisis pedagógico docente 2026</p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Panel de Control</h1>
+            <p className="text-slate-400 font-bold text-[9px] mt-1 uppercase tracking-widest">Análisis Pedagógico 2026</p>
           </div>
           
-          <div className="flex items-center gap-3 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-md">
-            <div className="p-2 bg-[#5e6ad2]/20 rounded text-[#5e6ad2]">
-              <ClipboardCheck className="w-4 h-4" />
+          <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
+            <div className="p-1.5 bg-[#4f46e5]/10 text-[#4f46e5] rounded">
+              <ClipboardCheck className="w-3.5 h-3.5" />
             </div>
             <div>
-              <p className="text-xl font-bold text-white leading-none">{monitoreos.length}</p>
-              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-tight mt-1">Registros Totales</p>
+              <p className="text-lg font-black text-slate-900 leading-none">{monitoreos.length}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Monitoreos</p>
             </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={clsx(
-              "flex items-center gap-2 px-4 py-2 rounded-md font-medium text-xs transition-all border",
+              "flex items-center gap-2 px-6 py-3 font-black text-[11px] uppercase tracking-widest transition-all border border-slate-200 rounded-l-lg",
               showFilters || activeFiltersCount > 0
-                ? "bg-[#5e6ad2]/10 border-[#5e6ad2]/30 text-[#5e6ad2]"
-                : "bg-[#121316] border-white/10 text-slate-400 hover:text-white hover:border-white/20"
+                ? "bg-[#4f46e5] border-[#4f46e5] text-white"
+                : "bg-white text-slate-500 hover:bg-slate-50"
             )}
           >
-            <Filter className="w-3.5 h-3.5" />
+            <Filter className="w-4 h-4" />
             Filtros
             {activeFiltersCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-[#5e6ad2] text-white text-[9px] rounded-full">
+              <span className="ml-2 px-2 py-0.5 bg-white text-[#4f46e5] text-[10px] font-black rounded">
                 {activeFiltersCount}
               </span>
             )}
@@ -97,15 +97,15 @@ const Dashboard = () => {
           
           <button
             onClick={() => refresh()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#121316] border border-white/10 rounded-md text-slate-400 hover:text-white hover:border-white/20 transition-all font-medium text-xs"
+            className="flex items-center gap-2 px-6 py-3 bg-white border border-l-0 border-slate-200 text-slate-500 hover:text-slate-900 transition-all font-black text-[11px] uppercase tracking-widest rounded-r-lg"
           >
-            <RefreshCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </button>
         </div>
       </div>
 
-      {/* Filtros Colapsables */}
+      {/* Filtros Compact */}
       <AnimatePresence>
         {showFilters && (
           <motion.div 
@@ -114,74 +114,61 @@ const Dashboard = () => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-8"
           >
-            <div className="bg-[#121316] p-6 rounded-lg border border-white/10">
+            <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Periodo</label>
-                  <div className="relative">
-                    <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                    <select name="periodo_id" value={filters.periodo_id} onChange={handleFilterChange} className="input-field pl-10">
-                      <option value="">Todos</option>
-                      {periodos.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                    </select>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Periodo</label>
+                  <select name="periodo_id" value={filters.periodo_id} onChange={handleFilterChange} className="input-field">
+                    <option value="">Todos los periodos</option>
+                    {periodos.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                  </select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Docente</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                    <select name="docente_id" value={filters.docente_id} onChange={handleFilterChange} className="input-field pl-10">
-                      <option value="">Todos</option>
-                      {docentes.map(d => <option key={d.dni} value={d.dni}>{d.nombre_completo}</option>)}
-                    </select>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Docente</label>
+                  <select name="docente_id" value={filters.docente_id} onChange={handleFilterChange} className="input-field">
+                    <option value="">Todos los docentes</option>
+                    {docentes.map(d => <option key={d.dni} value={d.dni}>{d.nombre_completo}</option>)}
+                  </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Grado</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grado</label>
                     <select name="grado" value={filters.grado} onChange={handleFilterChange} className="input-field">
-                      <option value="">Todos</option>
+                      <option value="">Grado</option>
                       {GRADOS.map(g => <option key={g} value={g}>{g}</option>)}
                     </select>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Sección</label>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sec.</label>
                     <select name="seccion" value={filters.seccion} onChange={handleFilterChange} className="input-field">
-                      <option value="">Todas</option>
+                      <option value="">Sec.</option>
                       {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Área</label>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Área</label>
                   <select name="area" value={filters.area} onChange={handleFilterChange} className="input-field">
-                    <option value="">Todas</option>
+                    <option value="">Todas las áreas</option>
                     {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
                   </select>
                 </div>
-              </div>
-              
-              <div className="mt-6 flex justify-end items-center border-t border-white/5 pt-4">
-                <button onClick={clearFilters} className="text-[10px] font-bold text-red-400/60 hover:text-red-400 uppercase tracking-widest transition-colors">
-                  Limpiar filtros
-                </button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* KPI Section */}
       <ResumenCards monitoreos={monitoreos} />
 
-      {/* Indicadores Grid */}
+      {/* Metrics Section Compact */}
       <section className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="h-4 w-1 bg-[#5e6ad2] rounded-full" />
-          <h2 className="text-sm font-bold text-white uppercase tracking-widest">Indicadores de Desempeño</h2>
+          <div className="h-3 w-1 bg-slate-900 rounded-full" />
+          <h2 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">Métricas por Indicador</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {distribucion.map((ind, i) => (
@@ -190,12 +177,12 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Balance & Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
+      {/* Radar & Ranking Compact */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 bg-white p-6 rounded-lg border border-slate-200">
           <GraficoRadarDesempeno data={datosRadar} />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200">
           <GraficoRankingNiveles data={datosRanking} />
         </div>
       </div>

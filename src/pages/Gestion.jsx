@@ -10,9 +10,9 @@ const Gestion = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Gestión Institucional</h1>
-        <p className="text-slate-500 mt-1">
-          Administración de docentes y accesos al sistema.
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Personal</h1>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+          Administración de docentes y accesos al sistema
         </p>
       </div>
 
@@ -22,7 +22,7 @@ const Gestion = () => {
           className={clsx(
             'px-6 py-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors',
             activeTab === 'docentes' 
-              ? 'border-sky-600 text-sky-700 bg-sky-50/50' 
+              ? 'border-[#4f46e5] text-[#4f46e5] bg-[#4f46e5]/5' 
               : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
           )}
         >
@@ -33,7 +33,7 @@ const Gestion = () => {
           className={clsx(
             'px-6 py-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors',
             activeTab === 'perfiles' 
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50' 
+              ? 'border-[#4f46e5] text-[#4f46e5] bg-[#4f46e5]/5' 
               : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
           )}
         >
