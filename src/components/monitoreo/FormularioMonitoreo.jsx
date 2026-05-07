@@ -10,16 +10,19 @@ import { SECCIONES } from '../../data/secciones';
 import { INDICADORES, NIVELES } from '../../data/indicadores';
 import {
   Save, User, Calendar, BookOpen,
-  GraduationCap, Users, Loader2, ClipboardList,
-  CalendarRange, AlertCircle,
+  GraduationCap, Users, Loader2, ClipboardCheck,
+  CalendarRange, AlertCircle, MessageSquare
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { es } from 'date-fns/locale';
 
-const NIVEL_GLOW = {
-  1: 'shadow-[0_0_15px_rgba(239,68,68,0.05)] border-red-500/20',
-  2: 'shadow-[0_0_15px_rgba(245,158,11,0.05)] border-amber-500/20',
-  3: 'shadow-[0_0_15px_rgba(59,130,246,0.05)] border-blue-500/20',
-  4: 'shadow-[0_0_15px_rgba(16,185,129,0.05)] border-emerald-500/20',
+const NIVEL_STYLES = {
+  1: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', active: 'bg-rose-600 text-white border-rose-600' },
+  2: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', active: 'bg-amber-500 text-white border-amber-500' },
+  3: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', active: 'bg-blue-600 text-white border-blue-600' },
+  4: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', active: 'bg-emerald-600 text-white border-emerald-600' },
 };
 
 const FormularioMonitoreo = ({ externalPeriodoId }) => {
@@ -33,19 +36,6 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
     label: `${d.dni} - ${d.nombre_completo}`,
     docente: d
   }));
-
-  const handleDocenteSelect = (selectedOption) => {
-    if (selectedOption) {
-      setFormData(prev => ({
-        ...prev,
-        dni_docente: selectedOption.docente.dni,
-        nombre_docente: selectedOption.docente.nombre_completo,
-        area: selectedOption.docente.area_principal || prev.area
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, dni_docente: '', nombre_docente: '' }));
-    }
-  };
 
   const emptyForm = {
     periodo_id: '',
@@ -65,12 +55,24 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
 
   const [formData, setFormData] = useState(emptyForm);
 
-  // Sincronizar con el periodo del Header
   useEffect(() => {
     if (externalPeriodoId) {
       setFormData(prev => ({ ...prev, periodo_id: externalPeriodoId }));
     }
   }, [externalPeriodoId]);
+
+  const handleDocenteSelect = (selectedOption) => {
+    if (selectedOption) {
+      setFormData(prev => ({
+        ...prev,
+        dni_docente: selectedOption.docente.dni,
+        nombre_docente: selectedOption.docente.nombre_completo,
+        area: selectedOption.docente.area_principal || prev.area
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, dni_docente: '', nombre_docente: '' }));
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -91,162 +93,230 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
     setIsSubmitting(true);
     const success = await addMonitoreo(formData);
     if (success) {
-      setFormData({ ...emptyForm, fecha: new Date().toISOString().split('T')[0] });
+      setFormData({ ...emptyForm, fecha: new Date().toISOString().split('T')[0], periodo_id: externalPeriodoId });
+      toast.success('Monitoreo registrado con éxito');
     }
     setIsSubmitting(false);
+  };
+  const areaOptions = AREAS.map(a => ({ value: a, label: a }));
+  const gradoOptions = GRADOS.map(g => ({ value: g, label: g }));
+  const seccionOptions = SECCIONES.map(s => ({ value: s, label: s }));
+
+  const customSelectStyles = {
+    control: (base) => ({
+      ...base,
+      padding: '4px',
+      borderColor: '#e2e8f0',
+      borderRadius: '0.5rem',
+      boxShadow: 'none',
+      backgroundColor: '#ffffff',
+      '&:hover': { borderColor: '#4f46e5' }
+    }),
+    option: (base, { isFocused, isSelected }) => ({
+      ...base,
+      backgroundColor: isSelected ? '#4f46e5' : isFocused ? '#f1f5f9' : 'white',
+      color: isSelected ? 'white' : '#1e293b',
+      fontSize: '13px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }),
+    singleValue: (base) => ({ ...base, color: '#1e293b', fontWeight: '700' }),
+    placeholder: (base) => ({ ...base, color: '#94a3b8' }),
+    menu: (base) => ({ ...base, zIndex: 50 })
   };
 
   if (!loadingPeriodos && periodosActivos.length === 0) {
     return (
-      <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-8 flex items-start gap-4">
-        <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
-        <div>
-          <h3 className="font-bold text-amber-500 text-lg">No hay periodos activos</h3>
-          <p className="text-amber-500/70 mt-1 text-sm">
-            Un administrador debe activar un periodo antes de registrar observaciones.
-          </p>
-        </div>
+      <div className="bg-amber-50 border border-amber-100 rounded-lg p-10 text-center">
+        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h3 className="font-black text-amber-900 text-lg uppercase tracking-tight">Sin Periodos Activos</h3>
+        <p className="text-amber-700 mt-2 text-sm max-w-sm mx-auto">
+          No se pueden registrar observaciones hasta que un administrador active un periodo de monitoreo.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden text-slate-900 shadow-none">
-      <form onSubmit={handleSubmit} className="p-10 space-y-12">
-        {/* Info Box */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/[0.01] p-6 border border-white/5 rounded-lg">
-          <div className="md:col-span-2 space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <User className="w-3 h-3" /> Buscar Docente
+    <div className="w-full animate-in fade-in duration-500">
+      <form onSubmit={handleSubmit} className="space-y-10 pb-20">
+        
+        {/* 1. SECCIÓN: DATOS DE LA SESIÓN (Bento Style) */}
+        <div className="bg-white border border-slate-200 rounded-lg">
+          <div className="px-8 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+            <ClipboardCheck className="w-4 h-4 text-indigo-600" />
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Configuración de la Sesión</h3>
+          </div>
+          <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Docente */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                <User className="w-3 h-3 text-indigo-600" /> Docente a Observar
+              </label>
+              <Select
+                options={docenteOptions}
+                isLoading={loadingDocentes}
+                onChange={handleDocenteSelect}
+                isClearable
+                placeholder="Buscar por DNI o Nombre..."
+                className="text-sm"
+                styles={customSelectStyles}
+                value={formData.dni_docente ? docenteOptions.find(o => o.value === formData.dni_docente) : null}
+              />
+            </div>
+
+            {/* Fecha */}
+            <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <Calendar className="w-3 h-3 text-indigo-600" /> Fecha de Registro
             </label>
-            <Select
-              options={docenteOptions}
-              isLoading={loadingDocentes}
-              onChange={handleDocenteSelect}
-              isClearable
-              placeholder="DNI o Nombre..."
-              className="text-sm"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: '#ffffff',
-                  borderColor: '#e5e7eb',
-                  borderRadius: '0.375rem',
-                  color: '#111827',
-                  '&:hover': { borderColor: '#d1d5db' }
-                }),
-                menu: (base) => ({ ...base, backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }),
-                option: (base, { isFocused }) => ({ ...base, backgroundColor: isFocused ? '#4f46e5' : 'transparent', color: isFocused ? 'white' : '#111827' }),
-                singleValue: (base) => ({ ...base, color: '#111827' }),
-                input: (base) => ({ ...base, color: '#111827' })
-              }}
-              value={formData.dni_docente ? docenteOptions.find(o => o.value === formData.dni_docente) : null}
+            <DatePicker
+              selected={formData.fecha ? new Date(formData.fecha + 'T12:00:00') : null}
+              onChange={(date) => setFormData(prev => ({ ...prev, fecha: date ? date.toISOString().split('T')[0] : '' }))}
+              locale={es}
+              dateFormat="dd/MM/yyyy"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-indigo-500 outline-none transition-all"
+              wrapperClassName="w-full"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <Calendar className="w-3 h-3" /> Fecha de Observación
-            </label>
-            <input type="date" name="fecha" required value={formData.fecha} onChange={handleInputChange} className="input-field" />
-          </div>
+            {/* Area, Grado, Seccion con React Select */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                <BookOpen className="w-3 h-3 text-indigo-600" /> Área Curricular
+              </label>
+              <Select
+                options={areaOptions}
+                placeholder="Área..."
+                styles={customSelectStyles}
+                value={areaOptions.find(o => o.value === formData.area)}
+                onChange={(opt) => setFormData(prev => ({ ...prev, area: opt?.value || '' }))}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <BookOpen className="w-3 h-3" /> Área Curricular
-            </label>
-            <select name="area" required value={formData.area} onChange={handleInputChange} className="input-field">
-              <option value="">Área...</option>
-              {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-          </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                <GraduationCap className="w-3 h-3 text-indigo-600" /> Grado
+              </label>
+              <Select
+                options={gradoOptions}
+                placeholder="Grado..."
+                styles={customSelectStyles}
+                value={gradoOptions.find(o => o.value === formData.grado)}
+                onChange={(opt) => setFormData(prev => ({ ...prev, grado: opt?.value || '' }))}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <GraduationCap className="w-3 h-3" /> Grado
-            </label>
-            <select name="grado" required value={formData.grado} onChange={handleInputChange} className="input-field">
-              <option value="">Grado...</option>
-              {GRADOS.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <Users className="w-3 h-3" /> Sección
-            </label>
-            <select name="seccion" required value={formData.seccion} onChange={handleInputChange} className="input-field">
-              <option value="">Sección...</option>
-              {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                <Users className="w-3 h-3 text-indigo-600" /> Sección
+              </label>
+              <Select
+                options={seccionOptions}
+                placeholder="Sección..."
+                styles={customSelectStyles}
+                value={seccionOptions.find(o => o.value === formData.seccion)}
+                onChange={(opt) => setFormData(prev => ({ ...prev, seccion: opt?.value || '' }))}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Indicadores */}
-        <div className="space-y-12">
-          <div className="flex items-center gap-3">
-            <div className="h-4 w-1 bg-[#4f46e5] rounded-full" />
-            <h3 className="text-[11px] font-bold text-slate-900 uppercase tracking-[0.2em]">Rúbricas de Desempeño</h3>
+        {/* 2. SECCIÓN: RÚBRICAS DE DESEMPEÑO */}
+        <div className="space-y-8">
+          <div className="flex items-center gap-4">
+            <div className="h-4 w-1.5 bg-indigo-600 rounded-full" />
+            <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Evaluación de Desempeño</h3>
           </div>
 
-          <div className="space-y-10">
+          <div className="grid grid-cols-1 gap-6">
             {INDICADORES.map((ind, idx) => (
-              <div key={ind.id} className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <span className="flex-shrink-0 text-xs font-bold text-slate-600 mt-0.5">0{idx + 1}</span>
-                  <p className="text-sm font-semibold text-slate-700 leading-relaxed">{ind.nombre}</p>
-                </div>
+              <div key={ind.id} className="bg-white border border-slate-200 rounded-lg p-8 transition-all hover:border-indigo-200 relative overflow-visible">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="max-w-2xl space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">0{idx + 1}</span>
+                      <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight">{ind.nombre_corto || ind.nombre.split(' ')[0]}</h4>
+                    </div>
+                    <p className="text-sm font-medium text-slate-500 leading-relaxed">{ind.nombre}</p>
+                  </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-8">
-                  {[1, 2, 3, 4].map(valor => {
-                    const isSelected = formData[ind.id] === valor;
-                    return (
-                      <button
-                        key={valor}
-                        type="button"
-                        onClick={() => handleIndicatorChange(ind.id, valor)}
-                        className={clsx(
-                          'flex flex-col items-center p-3 rounded-md border transition-all duration-200',
-                          isSelected
-                            ? `${NIVELES[valor].color.replace('bg-', 'bg-').replace('600', '500/10')} ${NIVELES[valor].border.replace('border-', 'border-').replace('500', '500/40')} text-slate-900 ring-1 ring-[#4f46e5]/20 ${NIVEL_GLOW[valor]}`
-                            : 'border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 hover:bg-slate-50'
-                        )}
-                      >
-                        <span className={clsx("text-xl font-bold", isSelected ? "text-slate-900" : "text-slate-300")}>{valor}</span>
-                        <span className="text-[9px] uppercase font-bold tracking-widest mt-1 opacity-60">
-                          {NIVELES[valor].etiqueta}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  {/* Selector de Nivel High-Contrast */}
+                  <div className="flex items-center bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                    {[1, 2, 3, 4].map(valor => {
+                      const isSelected = formData[ind.id] === valor;
+                      const style = NIVEL_STYLES[valor];
+                      return (
+                        <button
+                          key={valor}
+                          type="button"
+                          onClick={() => handleIndicatorChange(ind.id, valor)}
+                          className={clsx(
+                            'relative flex flex-col items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-lg transition-all duration-200 border-2',
+                            isSelected 
+                              ? style.active
+                              : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100 hover:text-indigo-400'
+                          )}
+                        >
+                          <span className={clsx("text-2xl md:text-3xl font-black leading-none", isSelected ? "scale-110" : "scale-100")}>
+                            {valor}
+                          </span>
+                          <span className={clsx(
+                            "text-[9px] font-black uppercase tracking-tighter mt-2 px-1 text-center leading-tight",
+                            isSelected ? "text-white" : "text-slate-400"
+                          )}>
+                            {NIVELES[valor].etiqueta}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Observaciones */}
-        <div className="space-y-2 border-t border-white/5 pt-8">
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Observaciones Adicionales</label>
-          <textarea
-            name="observaciones"
-            rows={4}
-            value={formData.observaciones}
-            onChange={handleInputChange}
-            className="input-field bg-white/[0.01] resize-none"
-            placeholder="Ingrese notas sobre la sesión..."
-          />
+        {/* 3. SECCIÓN: OBSERVACIONES */}
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="px-8 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+            <MessageSquare className="w-4 h-4 text-indigo-600" />
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Notas y Observaciones</h3>
+          </div>
+          <div className="p-8">
+            <textarea
+              name="observaciones"
+              rows={5}
+              value={formData.observaciones}
+              onChange={handleInputChange}
+              className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none placeholder:text-slate-300"
+              placeholder="Describa aspectos relevantes de la observación, evidencias encontradas y compromisos del docente..."
+            />
+          </div>
         </div>
 
-        <div className="flex justify-end pt-6">
+        {/* Footer de Acción */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4 border-t border-slate-200">
+          <div className="flex items-center gap-4 text-slate-400">
+            <div className="flex -space-x-2">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className={clsx("w-3 h-3 rounded-full border-2 border-white", i <= INDICADORES.filter(ind => formData[ind.id] > 0).length ? "bg-indigo-500" : "bg-slate-200")} />
+              ))}
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              {INDICADORES.filter(ind => formData[ind.id] > 0).length} de 5 Indicadores completados
+            </span>
+          </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary min-w-[240px] py-3 rounded-md flex items-center justify-center gap-3 text-sm"
+            className="w-full md:w-[320px] py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[12px] uppercase tracking-[0.2em] rounded-lg shadow-none transition-all flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Finalizar y Guardar</>}
+            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Guardar Observación</>}
           </button>
         </div>
+
       </form>
     </div>
   );

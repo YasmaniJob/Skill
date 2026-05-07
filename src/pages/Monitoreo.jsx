@@ -2,10 +2,16 @@ import { useState, useEffect } from 'react';
 import FormularioMonitoreo from '../components/monitoreo/FormularioMonitoreo';
 import { usePeriodos } from '../hooks/usePeriodos';
 import { CalendarRange } from 'lucide-react';
+import Select from 'react-select';
 
 const Monitoreo = () => {
   const { periodosActivos } = usePeriodos();
   const [periodoId, setPeriodoId] = useState('');
+
+  const periodoOptions = periodosActivos.map(p => ({
+    value: p.id,
+    label: p.nombre
+  }));
 
   // Auto-seleccionar periodo activo
   useEffect(() => {
@@ -24,21 +30,40 @@ const Monitoreo = () => {
           </p>
         </div>
 
-        {/* Periodo en el Header */}
+        {/* Periodo en el Header - Premium Select */}
         <div className="flex flex-col gap-1.5 min-w-[240px]">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-            <CalendarRange className="w-3 h-3" /> Periodo Activo
+            <CalendarRange className="w-3 h-3 text-indigo-600" /> Periodo Activo
           </label>
-          <select 
-            value={periodoId} 
-            onChange={(e) => setPeriodoId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:outline-none focus:border-[#4f46e5] transition-all"
-          >
-            <option value="">Seleccionar periodo...</option>
-            {periodosActivos.map(p => (
-              <option key={p.id} value={p.id}>{p.nombre}</option>
-            ))}
-          </select>
+          <Select 
+            options={periodoOptions}
+            value={periodoOptions.find(o => o.value === periodoId)}
+            onChange={(opt) => setPeriodoId(opt?.value || '')}
+            placeholder="Seleccionar periodo..."
+            className="text-sm font-bold"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: '#ffffff',
+                borderColor: '#e2e8f0',
+                borderRadius: '0.5rem',
+                padding: '2px',
+                boxShadow: 'none',
+                '&:hover': { borderColor: '#4f46e5' }
+              }),
+              option: (base, { isFocused, isSelected }) => ({
+                ...base,
+                backgroundColor: isSelected ? '#4f46e5' : isFocused ? '#f1f5f9' : 'white',
+                color: isSelected ? 'white' : '#1e293b',
+                fontSize: '13px',
+                fontWeight: '700'
+              }),
+              menu: (base) => ({
+                ...base,
+                zIndex: 100
+              })
+            }}
+          />
         </div>
       </div>
       
