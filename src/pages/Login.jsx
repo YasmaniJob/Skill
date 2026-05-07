@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { Monitor, Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { showErrorToast, getErrorMessage } from '../lib/errorUtils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -35,139 +35,95 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden font-sans">
-      {/* Background with Image */}
-      <div 
-        className="absolute inset-0 z-0 scale-105"
-        style={{
-          backgroundImage: 'url(/login_bg.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'brightness(0.7) blur(4px)'
-        }}
-      />
-      
-      {/* Decorative Overlays */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-br from-slate-900/60 via-transparent to-sky-900/40" />
+    <div className="min-h-screen bg-[#08090a] flex flex-col items-center justify-center p-6 text-[#eeeeee]">
+      {/* Glow Effect Background */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#5e6ad2]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5e6ad2]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-20 w-full max-w-[440px]"
+        className="w-full max-w-[360px]"
       >
-        {/* Glass Card */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 p-8 md:p-12">
-          
-          {/* Header */}
-          <div className="text-center mb-10">
-            <motion.div 
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              className="inline-flex p-4 bg-sky-600 rounded-3xl mb-6 shadow-lg shadow-sky-200"
-            >
-              <Monitor className="w-10 h-10 text-white" />
-            </motion.div>
-            <h1 className="text-5xl font-black text-slate-900 tracking-tighter mb-2">
-              Skill
-            </h1>
-            <div className="h-1 w-12 bg-sky-600 mx-auto rounded-full mb-3" />
-            <p className="text-slate-500 font-medium text-sm">
-              Gestión Pedagógica y Monitoreo 2026
-            </p>
+        {/* Logo Section */}
+        <div className="flex flex-col items-center mb-10">
+          <img src="/logo.png" alt="Skill Logo" className="w-12 h-12 mb-4" />
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Ingresar a Skill
+          </h1>
+          <p className="text-sm text-slate-500 mt-2">
+            Gestión Pedagógica de Alto Rendimiento
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 ml-0.5">
+              Email
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[#121316] border border-white/10 rounded-md py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5e6ad2] transition-all"
+                placeholder="nombre@ejemplo.com"
+              />
+            </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                Correo Institucional
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-300 group-focus-within:text-sky-500 transition-colors" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-sky-500 focus:bg-white rounded-2xl text-slate-700 font-bold transition-all outline-none"
-                  placeholder="usuario@colegio.edu.pe"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center px-0.5">
+              <label className="text-xs font-medium text-slate-400">
                 Contraseña
               </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-300 group-focus-within:text-sky-500 transition-colors" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-sky-500 focus:bg-white rounded-2xl text-slate-700 font-bold transition-all outline-none"
-                  placeholder="••••••••"
-                />
-              </div>
             </div>
-
-            <AnimatePresence>
-              {authError && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-xs font-bold">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p>{authError}</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="relative w-full overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-sky-600 to-sky-500 group-hover:scale-105 transition-transform duration-300" />
-              <div className="relative flex items-center justify-center gap-3 py-4 px-6 text-white font-black uppercase tracking-widest text-sm disabled:opacity-70">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Validando...
-                  </>
-                ) : (
-                  <>
-                    Ingresar al Panel
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </div>
-            </button>
-          </form>
-
-          {/* Footer Info */}
-          <div className="mt-10 pt-8 border-t border-slate-100 text-center">
-            <p className="text-[10px] text-slate-400 font-medium leading-relaxed uppercase tracking-wider">
-              Sistema exclusivo para personal directivo<br/>
-              Instituciones Educativas del Perú
-            </p>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#121316] border border-white/10 rounded-md py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#5e6ad2] transition-all"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
-        </div>
-      </motion.div>
 
-      {/* Aesthetic Floating Elements */}
-      <div className="absolute top-1/4 -left-20 w-64 h-64 bg-sky-500/10 rounded-full blur-[100px] z-0" />
-      <div className="absolute bottom-1/4 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] z-0" />
+          {authError && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex items-center gap-2.5 text-red-400 text-xs font-medium"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {authError}
+            </motion.div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#5e6ad2] hover:bg-[#6b79e0] text-white py-2.5 rounded-md text-sm font-semibold transition-all flex items-center justify-center gap-2 mt-2 shadow-lg shadow-indigo-500/10 active:scale-[0.98] disabled:opacity-50"
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              'Continuar'
+            )}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <p className="mt-8 text-center text-[11px] text-slate-600">
+          Uso exclusivo para instituciones educativas del Perú.<br/>
+          &copy; 2026 Skill. Todos los derechos reservados.
+        </p>
+      </motion.div>
     </div>
   );
 };

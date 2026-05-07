@@ -5,12 +5,10 @@ import {
 
 const GraficoRankingNiveles = ({ data }) => {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 h-full flex flex-col">
-      <div className="mb-6 flex justify-between items-end">
-        <div>
-          <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Perfil de Desempeño por Docente</h3>
-          <p className="text-[10px] text-slate-500 font-bold uppercase">Top 10 docentes según niveles de logro</p>
-        </div>
+    <div className="bg-[#121316] p-8 rounded-lg border border-white/10 h-full flex flex-col">
+      <div className="mb-6">
+        <h3 className="text-sm font-bold text-white uppercase tracking-widest">Desempeño por Docente</h3>
+        <p className="text-[10px] text-slate-500 font-medium uppercase mt-1">Niveles de logro acumulados (Top 10)</p>
       </div>
 
       <div className="flex-1 min-h-[350px]">
@@ -19,27 +17,31 @@ const GraficoRankingNiveles = ({ data }) => {
             layout="vertical"
             data={data}
             margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+            barSize={12}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255, 255, 255, 0.05)" />
             <XAxis type="number" hide />
             <YAxis 
               dataKey="name" 
               type="category" 
-              tick={{ fill: '#475569', fontSize: 10, fontWeight: 700 }}
-              width={100}
+              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
+              width={120}
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip 
-              cursor={{ fill: '#f8fafc' }}
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              cursor={{ fill: 'rgba(255, 255, 255, 0.02)' }}
+              contentStyle={{ background: '#1a1b1e', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', fontSize: '11px' }}
+              itemStyle={{ fontSize: '10px', fontWeight: 600 }}
             />
             <Legend 
               iconType="circle"
-              wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase' }}
+              wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
             />
-            <Bar dataKey="n4" name="Destacado" stackId="a" fill="#22c55e" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="n3" name="Suficiente" stackId="a" fill="#3b82f6" />
-            <Bar dataKey="n2" name="En Proceso" stackId="a" fill="#f97316" />
-            <Bar dataKey="n1" name="Muy Deficiente" stackId="a" fill="#ef4444" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="n4" name="N4" stackId="a" fill="#10b981" />
+            <Bar dataKey="n3" name="N3" stackId="a" fill="#3b82f6" />
+            <Bar dataKey="n2" name="N2" stackId="a" fill="#f59e0b" />
+            <Bar dataKey="n1" name="N1" stackId="a" fill="#ef4444" radius={[0, 2, 2, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

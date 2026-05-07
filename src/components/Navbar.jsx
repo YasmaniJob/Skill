@@ -1,88 +1,49 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import {
-  LayoutDashboard, ClipboardList, ListChecks,
-  FileBarChart, LogOut, Monitor, CalendarRange, Users,
+import { 
+  Bell, Search, Settings, 
+  ChevronDown, HelpCircle, Command 
 } from 'lucide-react';
-import { clsx } from 'clsx';
-
-const ROL_LABELS = {
-  admin: { label: 'Administrador', color: 'bg-purple-100 text-purple-700' },
-  director: { label: 'Director(a)', color: 'bg-sky-100 text-sky-700' },
-  subdirector: { label: 'Subdirector(a)', color: 'bg-blue-100 text-blue-700' },
-  coordinador: { label: 'Coordinador(a)', color: 'bg-teal-100 text-teal-700' },
-};
+import { motion } from 'framer-motion';
 
 const Navbar = () => {
-  const { logout, user, rol, esDirectivo } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try { await logout(); navigate('/login'); }
-    catch (error) { console.error('Error logging out:', error); }
-  };
-
-  const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard, show: true },
-    { name: 'Nuevo Registro', path: '/nuevo', icon: ClipboardList, show: true },
-    { name: 'Registros', path: '/registros', icon: ListChecks, show: true },
-    { name: 'Periodos', path: '/periodos', icon: CalendarRange, show: esDirectivo },
-    { name: 'Gestión', path: '/gestion', icon: Users, show: esDirectivo },
-    { name: 'Reportes', path: '/reportes', icon: FileBarChart, show: true },
-  ];
-
-  const rolInfo = ROL_LABELS[rol] ?? { label: 'Sin rol', color: 'bg-slate-100 text-slate-500' };
+  const { perfil } = useAuth();
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2 group mr-6">
-              <div className="p-1.5 bg-sky-600 rounded-lg group-hover:bg-sky-700 transition-colors">
-                <Monitor className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-extrabold text-sky-700 tracking-tight">Skill</span>
-            </Link>
-
-            {/* Nav links */}
-            <div className="hidden md:flex items-center space-x-1">
-              {navItems.filter(i => i.show).map(item => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={clsx(
-                    'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
-                    location.pathname === item.path
-                      ? 'bg-sky-50 text-sky-700'
-                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                  )}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.name}
-                </Link>
-              ))}
-            </div>
+    <nav className="h-16 bg-[#08090a]/80 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between sticky top-0 z-30">
+      {/* Left Search */}
+      <div className="hidden md:flex items-center flex-1 max-w-md relative group">
+        <div className="absolute left-3 flex items-center pointer-events-none text-slate-500">
+          <Search className="w-4 h-4" />
+        </div>
+        <div className="w-full bg-white/[0.03] border border-white/10 rounded-md py-1.5 pl-10 pr-4 text-xs text-slate-400 group-focus-within:border-white/20 transition-all flex justify-between items-center cursor-pointer">
+          <span>Buscar en Skill...</span>
+          <div className="flex items-center gap-1 text-[10px] font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-slate-500">
+            <Command className="w-2.5 h-2.5" /> K
           </div>
+        </div>
+      </div>
 
-          {/* User info + logout */}
-          <div className="flex items-center gap-3">
-            <div className="hidden lg:flex flex-col items-end">
-              <span className={clsx('text-[10px] font-bold px-2 py-0.5 rounded-full', rolInfo.color)}>
-                {rolInfo.label}
-              </span>
-              <span className="text-xs text-slate-400 mt-0.5">{user?.email}</span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
-              title="Cerrar sesión"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+      {/* Right Controls */}
+      <div className="flex items-center gap-2">
+        <button className="p-2 text-slate-400 hover:text-white transition-colors rounded-md hover:bg-white/5">
+          <HelpCircle className="w-5 h-5" />
+        </button>
+        <button className="p-2 text-slate-400 hover:text-white transition-colors rounded-md hover:bg-white/5 relative">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-[#5e6ad2] rounded-full ring-2 ring-[#08090a]"></span>
+        </button>
+        
+        <div className="h-4 w-px bg-white/10 mx-2" />
+
+        <div className="flex items-center gap-3 pl-2 group cursor-pointer">
+          <div className="w-7 h-7 rounded-md bg-[#5e6ad2] flex items-center justify-center text-white font-bold text-[10px] shadow-lg shadow-indigo-500/20">
+            {perfil?.nombre_completo?.charAt(0) || 'U'}
           </div>
+          <div className="hidden sm:block text-right">
+            <p className="text-xs font-semibold text-white leading-none">{perfil?.nombre_completo?.split(' ')[0]}</p>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-1">{perfil?.rol}</p>
+          </div>
+          <ChevronDown className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
         </div>
       </div>
     </nav>

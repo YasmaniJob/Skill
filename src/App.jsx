@@ -18,7 +18,18 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Toaster position="top-right" />
+        <Toaster 
+          position="top-right" 
+          toastOptions={{
+            style: {
+              background: '#121316',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              fontSize: '14px',
+            },
+          }}
+        />
         <Routes>
           <Route path="/login" element={<Login />} />
 

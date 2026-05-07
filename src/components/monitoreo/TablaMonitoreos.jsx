@@ -29,13 +29,17 @@ const TablaMonitoreos = () => {
   };
 
   const IndicatorBadge = ({ value }) => {
-    if (!value) return <span className="text-slate-200">—</span>;
+    if (!value) return <span className="text-slate-700">—</span>;
     const nivel = NIVELES[value];
+    const fill = nivel.color.replace('bg-', 'bg-').replace('600', '500/20').replace('500', '500/20');
+    const border = nivel.border.replace('border-', 'border-').replace('500', '500/30');
+    const text = nivel.color.replace('bg-', 'text-').replace('600', '400').replace('500', '400');
+    
     return (
       <div
         className={clsx(
-          'w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold mx-auto',
-          nivel.color
+          'w-7 h-7 rounded border flex items-center justify-center text-[10px] font-bold mx-auto',
+          fill, border, text
         )}
         title={nivel.etiqueta}
       >
@@ -46,10 +50,10 @@ const TablaMonitoreos = () => {
 
   return (
     <div className="space-y-4">
-      {/* Filtros */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[180px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      {/* Filtros Bar */}
+      <div className="bg-[#121316] p-3 rounded-lg border border-white/10 flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
           <input
             type="text"
             name="nombre"
@@ -59,8 +63,8 @@ const TablaMonitoreos = () => {
             className="input-field pl-10"
           />
         </div>
-        <div className="relative min-w-[180px]">
-          <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <div className="relative min-w-[200px]">
+          <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
           <select
             name="periodo_id"
             value={filters.periodo_id}
@@ -71,8 +75,8 @@ const TablaMonitoreos = () => {
             {periodos.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
         </div>
-        <div className="relative min-w-[180px]">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <div className="relative min-w-[200px]">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
           <select
             name="area"
             value={filters.area}
@@ -85,77 +89,77 @@ const TablaMonitoreos = () => {
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      {/* Tabla Container */}
+      <div className="bg-[#121316] rounded-lg border border-white/10 overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Docente</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Área / Grado</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Periodo</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">I1</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">I2</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">I3</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">I4</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">I5</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Prom</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Acc.</th>
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-white/[0.02] border-b border-white/5">
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Fecha</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Docente</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Información Académica</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Periodo</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">I1</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">I2</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">I3</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">I4</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">I5</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">PROM</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr><td colSpan="11" className="px-6 py-12 text-center text-slate-400">Cargando registros...</td></tr>
+                <tr><td colSpan="11" className="px-6 py-12 text-center text-slate-600 animate-pulse font-medium">Cargando base de datos...</td></tr>
               ) : paginatedData.length === 0 ? (
-                <tr><td colSpan="11" className="px-6 py-12 text-center text-slate-400">No se encontraron registros</td></tr>
+                <tr><td colSpan="11" className="px-6 py-12 text-center text-slate-600 font-medium italic">No se encontraron registros para esta consulta</td></tr>
               ) : (
                 paginatedData.map(m => {
                   const prom = ((m.involucra_estudiantes + m.promueve_razonamiento + m.evalua_progreso + m.propicia_ambiente + m.regula_comportamiento) / 5);
-                  const promColor = prom >= 3.5 ? 'text-green-700' : prom >= 2.5 ? 'text-blue-700' : prom >= 1.5 ? 'text-orange-600' : 'text-red-600';
+                  const promColor = prom >= 3.5 ? 'text-emerald-400' : prom >= 2.5 ? 'text-blue-400' : prom >= 1.5 ? 'text-amber-400' : 'text-red-400';
                   const canDelete = esAdmin || (user && m.registrado_por === user.id);
 
                   return (
-                    <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-slate-600 font-medium whitespace-nowrap">
+                    <tr key={m.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <td className="px-6 py-4 text-[13px] text-slate-400 font-medium whitespace-nowrap">
                         {new Date(m.fecha + 'T12:00:00').toLocaleDateString('es-PE')}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-900 whitespace-nowrap">{m.nombre_docente}</span>
-                          <span className="text-xs text-slate-400">DNI: {m.dni_docente}</span>
+                          <span className="text-[13px] font-bold text-white group-hover:text-[#5e6ad2] transition-colors">{m.nombre_docente}</span>
+                          <span className="text-[10px] text-slate-600 tracking-wider">DNI: {m.dni_docente}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full block w-fit max-w-[160px] truncate" title={m.area}>
-                          {m.area}
-                        </span>
-                        <span className="text-xs text-slate-400 mt-0.5 block">{m.grado} – {m.seccion}</span>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[11px] font-semibold text-slate-300 truncate max-w-[180px]" title={m.area}>{m.area}</span>
+                          <span className="text-[10px] text-slate-600 uppercase tracking-tight">{m.grado} – {m.seccion}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-slate-500 whitespace-nowrap">
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] text-slate-500 font-medium">
                           {m.periodo?.nombre ?? '—'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center"><IndicatorBadge value={m.involucra_estudiantes} /></td>
-                      <td className="px-4 py-3 text-center"><IndicatorBadge value={m.promueve_razonamiento} /></td>
-                      <td className="px-4 py-3 text-center"><IndicatorBadge value={m.evalua_progreso} /></td>
-                      <td className="px-4 py-3 text-center"><IndicatorBadge value={m.propicia_ambiente} /></td>
-                      <td className="px-4 py-3 text-center"><IndicatorBadge value={m.regula_comportamiento} /></td>
-                      <td className={clsx('px-4 py-3 text-center text-sm font-bold', promColor)}>
+                      <td className="px-6 py-4 text-center"><IndicatorBadge value={m.involucra_estudiantes} /></td>
+                      <td className="px-6 py-4 text-center"><IndicatorBadge value={m.promueve_razonamiento} /></td>
+                      <td className="px-6 py-4 text-center"><IndicatorBadge value={m.evalua_progreso} /></td>
+                      <td className="px-6 py-4 text-center"><IndicatorBadge value={m.propicia_ambiente} /></td>
+                      <td className="px-6 py-4 text-center"><IndicatorBadge value={m.regula_comportamiento} /></td>
+                      <td className={clsx('px-6 py-4 text-center text-sm font-bold', promColor)}>
                         {prom.toFixed(1)}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-6 py-4 text-right">
                         {canDelete ? (
                           <button
                             onClick={() => deleteMonitoreo(m.id)}
-                            className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title="Eliminar"
+                            className="p-2 text-slate-700 hover:text-red-400 hover:bg-red-500/10 rounded transition-all opacity-0 group-hover:opacity-100"
+                            title="Eliminar Registro"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         ) : (
-                          <MoreHorizontal className="w-4 h-4 text-slate-200 mx-auto" />
+                          <MoreHorizontal className="w-4 h-4 text-slate-800" />
                         )}
                       </td>
                     </tr>
@@ -166,23 +170,27 @@ const TablaMonitoreos = () => {
           </table>
         </div>
 
+        {/* Pagination Linear-style */}
         {totalPages > 1 && (
-          <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-            <span className="text-xs text-slate-500">
-              {monitoreos.length} registros · Página {currentPage} de {totalPages}
+          <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex items-center justify-between">
+            <span className="text-[11px] text-slate-600 font-medium tracking-tight">
+              Mostrando <span className="text-slate-400">{paginatedData.length}</span> de <span className="text-slate-400">{monitoreos.length}</span> registros
             </span>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => p - 1)}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-all"
+                className="p-1.5 rounded border border-white/5 bg-white/[0.02] text-slate-500 hover:text-white hover:bg-white/5 disabled:opacity-20 transition-all"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
+              <div className="flex items-center px-3 text-[11px] text-slate-500 font-bold">
+                {currentPage} / {totalPages}
+              </div>
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => p + 1)}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-all"
+                className="p-1.5 rounded border border-white/5 bg-white/[0.02] text-slate-500 hover:text-white hover:bg-white/5 disabled:opacity-20 transition-all"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

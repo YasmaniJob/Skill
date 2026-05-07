@@ -4,10 +4,10 @@ const GraficoDonaItem = ({ indicador }) => {
   const { nombre, abrev, data, total } = indicador;
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col items-center">
-      <div className="text-center mb-2">
-        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{abrev}</h4>
-        <p className="text-xs font-bold text-slate-700 leading-tight h-8 flex items-center justify-center px-2">
+    <div className="bg-[#121316] p-6 rounded-lg border border-white/10 flex flex-col items-center">
+      <div className="text-center mb-4">
+        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{abrev}</h4>
+        <p className="text-xs font-semibold text-slate-300 leading-tight h-8 flex items-center justify-center px-2">
           {nombre}
         </p>
       </div>
@@ -19,16 +19,16 @@ const GraficoDonaItem = ({ indicador }) => {
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={55}
+              innerRadius={60}
               outerRadius={75}
-              paddingAngle={4}
+              paddingAngle={2}
               dataKey="value"
               stroke="none"
               labelLine={false}
-              label={({ value }) => value > 0 ? value : ''}
+              label={false}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
+                <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity" />
               ))}
             </Pie>
             <Tooltip 
@@ -37,13 +37,13 @@ const GraficoDonaItem = ({ indicador }) => {
                   const { name, value, fill } = payload[0].payload;
                   const percent = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
                   return (
-                    <div className="bg-white p-3 border border-slate-100 rounded-xl shadow-sm">
+                    <div className="bg-[#1a1b1e] p-3 border border-white/10 rounded-md shadow-2xl">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: fill }} />
-                        <span className="text-[10px] font-black text-slate-400 uppercase">{name}</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{name}</span>
                       </div>
-                      <p className="text-sm font-black text-slate-800">
-                        {value} {value === 1 ? 'Docente' : 'Docentes'} <span className="text-slate-400 font-bold ml-1">({percent}%)</span>
+                      <p className="text-sm font-bold text-white">
+                        {value} {value === 1 ? 'Docente' : 'Docentes'} <span className="text-[#5e6ad2] font-bold ml-1">({percent}%)</span>
                       </p>
                     </div>
                   );
@@ -56,20 +56,20 @@ const GraficoDonaItem = ({ indicador }) => {
         
         {/* Centro de la Dona */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-2xl font-black text-slate-800">{total}</span>
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Total</span>
+          <span className="text-2xl font-bold text-white tracking-tighter">{total}</span>
+          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Total</span>
         </div>
       </div>
 
-      {/* Leyenda Simple */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2 w-full">
+      {/* Leyenda Linear-style */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4 w-full pt-4 border-t border-white/5">
         {data.map((entry, i) => (
           <div key={i} className="flex items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.fill }} />
-              <span className="text-[9px] font-bold text-slate-500 uppercase">{entry.name}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.fill }} />
+              <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-tight">{entry.name}</span>
             </div>
-            <span className="text-[9px] font-black text-slate-700">{entry.value}</span>
+            <span className="text-[10px] font-bold text-slate-300">{entry.value}</span>
           </div>
         ))}
       </div>

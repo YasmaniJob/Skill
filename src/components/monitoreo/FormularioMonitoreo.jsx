@@ -9,17 +9,17 @@ import { GRADOS } from '../../data/grados';
 import { SECCIONES } from '../../data/secciones';
 import { INDICADORES, NIVELES } from '../../data/indicadores';
 import {
-  Save, User, IdCard, Calendar, BookOpen,
+  Save, User, Calendar, BookOpen,
   GraduationCap, Users, Loader2, ClipboardList,
   CalendarRange, AlertCircle,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
-const NIVEL_RING = {
-  1: 'ring-red-200',
-  2: 'ring-orange-200',
-  3: 'ring-blue-200',
-  4: 'ring-green-200',
+const NIVEL_GLOW = {
+  1: 'shadow-[0_0_15px_rgba(239,68,68,0.1)] border-red-500/30',
+  2: 'shadow-[0_0_15px_rgba(245,158,11,0.1)] border-amber-500/30',
+  3: 'shadow-[0_0_15px_rgba(59,130,246,0.1)] border-blue-500/30',
+  4: 'shadow-[0_0_15px_rgba(16,185,129,0.1)] border-emerald-500/30',
 };
 
 const FormularioMonitoreo = () => {
@@ -43,11 +43,7 @@ const FormularioMonitoreo = () => {
         area: selectedOption.docente.area_principal || prev.area
       }));
     } else {
-      setFormData(prev => ({
-        ...prev,
-        dni_docente: '',
-        nombre_docente: '',
-      }));
+      setFormData(prev => ({ ...prev, dni_docente: '', nombre_docente: '' }));
     }
   };
 
@@ -82,7 +78,7 @@ const FormularioMonitoreo = () => {
     e.preventDefault();
     const allScored = INDICADORES.every(ind => formData[ind.id] > 0);
     if (!allScored) {
-      toast.error('Por favor califique todos los indicadores antes de guardar.');
+      toast.error('Por favor califique todos los indicadores.');
       return;
     }
     setIsSubmitting(true);
@@ -93,15 +89,14 @@ const FormularioMonitoreo = () => {
     setIsSubmitting(false);
   };
 
-  // Si no hay periodos activos, mostrar aviso
   if (!loadingPeriodos && periodosActivos.length === 0) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 flex items-start gap-4">
+      <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-8 flex items-start gap-4">
         <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
         <div>
-          <h3 className="font-bold text-amber-800 text-lg">No hay periodos de monitoreo activos</h3>
-          <p className="text-amber-700 mt-1">
-            Un Director o Administrador debe crear y activar un periodo de monitoreo antes de registrar observaciones.
+          <h3 className="font-bold text-amber-500 text-lg">No hay periodos activos</h3>
+          <p className="text-amber-500/70 mt-1 text-sm">
+            Un administrador debe activar un periodo antes de registrar observaciones.
           </p>
         </div>
       </div>
@@ -109,147 +104,111 @@ const FormularioMonitoreo = () => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="p-6 border-b border-slate-100 bg-slate-50">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-sky-600" />
+    <div className="bg-[#121316] rounded-lg border border-white/10 overflow-hidden text-[#eeeeee]">
+      <div className="p-8 border-b border-white/5 bg-white/[0.02]">
+        <h2 className="text-xl font-bold text-white flex items-center gap-3">
+          <ClipboardList className="w-5 h-5 text-[#5e6ad2]" />
           Nuevo Registro de Monitoreo
         </h2>
-        <p className="text-sm text-slate-500 mt-1">
-          Ingrese la información detallada del desempeño docente observado.
-        </p>
+        <p className="text-sm text-slate-500 mt-1">Ingrese la información detallada de la sesión observada.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-8">
-        {/* Periodo */}
-        <div className="bg-sky-50 border border-sky-100 rounded-xl p-4">
-          <label className="text-sm font-bold text-sky-800 flex items-center gap-2 mb-2">
-            <CalendarRange className="w-4 h-4" /> Periodo de Monitoreo
-          </label>
-          <select
-            name="periodo_id"
-            required
-            value={formData.periodo_id}
-            onChange={handleInputChange}
-            className="input-field bg-white"
-          >
-            <option value="">Seleccione el periodo de monitoreo</option>
-            {periodosActivos.map(p => (
-              <option key={p.id} value={p.id}>{p.nombre}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Información General */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-slate-400" /> Fecha de visita
+      <form onSubmit={handleSubmit} className="p-8 space-y-10">
+        {/* Info Box */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-white/[0.01] p-6 border border-white/5 rounded-lg">
+          <div className="md:col-span-1 space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <CalendarRange className="w-3 h-3" /> Periodo
             </label>
-            <input
-              type="date"
-              name="fecha"
-              required
-              value={formData.fecha}
-              onChange={handleInputChange}
-              className="input-field"
-            />
+            <select name="periodo_id" required value={formData.periodo_id} onChange={handleInputChange} className="input-field">
+              <option value="">Seleccionar...</option>
+              {periodosActivos.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+            </select>
           </div>
 
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <User className="w-4 h-4 text-slate-400" /> Buscar Docente (DNI o Nombre)
+          <div className="md:col-span-2 space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <User className="w-3 h-3" /> Buscar Docente
             </label>
             <Select
               options={docenteOptions}
               isLoading={loadingDocentes}
               onChange={handleDocenteSelect}
               isClearable
-              placeholder="Escriba para buscar..."
-              noOptionsMessage={() => "No se encontró el docente"}
+              placeholder="DNI o Nombre..."
               className="text-sm"
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderColor: '#e2e8f0',
-                  borderRadius: '0.75rem',
-                  padding: '2px',
-                  boxShadow: 'none',
-                  '&:hover': { borderColor: '#cbd5e1' }
-                })
+                  backgroundColor: '#121316',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '0.375rem',
+                  color: '#eeeeee',
+                  '&:hover': { borderColor: 'rgba(255, 255, 255, 0.2)' }
+                }),
+                menu: (base) => ({ ...base, backgroundColor: '#1a1b1e', border: '1px solid rgba(255, 255, 255, 0.1)' }),
+                option: (base, { isFocused }) => ({ ...base, backgroundColor: isFocused ? '#5e6ad2' : 'transparent', color: isFocused ? 'white' : '#eeeeee' }),
+                singleValue: (base) => ({ ...base, color: '#eeeeee' }),
+                input: (base) => ({ ...base, color: '#eeeeee' })
               }}
               value={formData.dni_docente ? docenteOptions.find(o => o.value === formData.dni_docente) : null}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-slate-400" /> Área Curricular
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <Calendar className="w-3 h-3" /> Fecha
             </label>
-            <select
-              name="area"
-              required
-              value={formData.area}
-              onChange={handleInputChange}
-              className="input-field"
-            >
-              <option value="">Seleccione Área</option>
+            <input type="date" name="fecha" required value={formData.fecha} onChange={handleInputChange} className="input-field" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <BookOpen className="w-3 h-3" /> Área
+            </label>
+            <select name="area" required value={formData.area} onChange={handleInputChange} className="input-field">
+              <option value="">Área...</option>
               {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-slate-400" /> Grado
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <GraduationCap className="w-3 h-3" /> Grado
             </label>
-            <select
-              name="grado"
-              required
-              value={formData.grado}
-              onChange={handleInputChange}
-              className="input-field"
-            >
-              <option value="">Seleccione Grado</option>
+            <select name="grado" required value={formData.grado} onChange={handleInputChange} className="input-field">
+              <option value="">Grado...</option>
               {GRADOS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Users className="w-4 h-4 text-slate-400" /> Sección
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <Users className="w-3 h-3" /> Sección
             </label>
-            <select
-              name="seccion"
-              required
-              value={formData.seccion}
-              onChange={handleInputChange}
-              className="input-field"
-            >
-              <option value="">Seleccione Sección</option>
+            <select name="seccion" required value={formData.seccion} onChange={handleInputChange} className="input-field">
+              <option value="">Sección...</option>
               {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
         </div>
 
         {/* Indicadores */}
-        <div className="border-t border-slate-100 pt-8">
-          <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-3">
-            <div className="w-1.5 h-6 bg-sky-600 rounded-full" />
-            Indicadores de Desempeño Pedagógico
-          </h3>
-          <p className="text-xs text-slate-400 mb-6 ml-4">Basado en las Rúbricas de Observación de Aula — MINEDU</p>
+        <div className="space-y-12">
+          <div className="flex items-center gap-3">
+            <div className="h-4 w-1 bg-[#5e6ad2] rounded-full" />
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest">Rúbricas de Desempeño</h3>
+          </div>
 
-          <div className="space-y-8">
+          <div className="space-y-10">
             {INDICADORES.map((ind, idx) => (
-              <div key={ind.id} className="space-y-3">
+              <div key={ind.id} className="space-y-4">
                 <div className="flex items-start gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sky-50 text-sky-700 border border-sky-200 rounded-full flex items-center justify-center text-sm font-bold">
-                    {idx + 1}
-                  </span>
-                  <p className="text-slate-700 font-medium pt-1 leading-snug">{ind.nombre}</p>
+                  <span className="flex-shrink-0 text-xs font-bold text-slate-600 mt-0.5">0{idx + 1}</span>
+                  <p className="text-sm font-semibold text-slate-300 leading-relaxed">{ind.nombre}</p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-8">
                   {[1, 2, 3, 4].map(valor => {
                     const isSelected = formData[ind.id] === valor;
                     return (
@@ -258,17 +217,14 @@ const FormularioMonitoreo = () => {
                         type="button"
                         onClick={() => handleIndicatorChange(ind.id, valor)}
                         className={clsx(
-                          'flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer',
+                          'flex flex-col items-center p-3 rounded-md border transition-all duration-200',
                           isSelected
-                            ? `${NIVELES[valor].border} ${NIVELES[valor].color} text-white ring-4 ring-offset-2 ${NIVEL_RING[valor]}`
-                            : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100'
+                            ? `${NIVELES[valor].color.replace('bg-', 'bg-').replace('600', '500/20')} ${NIVELES[valor].border.replace('border-', 'border-').replace('500', '500/50')} text-white ring-1 ring-[#5e6ad2]/30 ${NIVEL_GLOW[valor]}`
+                            : 'border-white/5 bg-white/[0.02] text-slate-500 hover:border-white/10 hover:bg-white/[0.04]'
                         )}
                       >
-                        <span className="text-2xl font-bold">{valor}</span>
-                        <span className={clsx(
-                          'text-[10px] uppercase font-black tracking-wider mt-1 text-center',
-                          isSelected ? 'text-white/90' : 'text-slate-400'
-                        )}>
+                        <span className={clsx("text-xl font-bold", isSelected ? "text-white" : "text-slate-600")}>{valor}</span>
+                        <span className="text-[9px] uppercase font-bold tracking-widest mt-1 opacity-60">
                           {NIVELES[valor].etiqueta}
                         </span>
                       </button>
@@ -281,31 +237,25 @@ const FormularioMonitoreo = () => {
         </div>
 
         {/* Observaciones */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">
-            Observaciones <span className="text-slate-400 font-normal">(opcional)</span>
-          </label>
+        <div className="space-y-2 border-t border-white/5 pt-8">
+          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-0.5">Observaciones Adicionales</label>
           <textarea
             name="observaciones"
-            rows={3}
-            placeholder="Comentarios adicionales sobre la sesión de aprendizaje observada..."
+            rows={4}
             value={formData.observaciones}
             onChange={handleInputChange}
-            className="input-field resize-none"
+            className="input-field bg-white/[0.01] resize-none"
+            placeholder="Ingrese notas sobre la sesión..."
           />
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex justify-end">
+        <div className="flex justify-end pt-6">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary min-w-[220px] flex items-center justify-center gap-2 py-3 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="btn-primary min-w-[240px] py-3 rounded-md flex items-center justify-center gap-3 text-sm"
           >
-            {isSubmitting ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Guardando...</>
-            ) : (
-              <><Save className="w-5 h-5" /> Guardar Registro</>
-            )}
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Finalizar y Guardar</>}
           </button>
         </div>
       </form>

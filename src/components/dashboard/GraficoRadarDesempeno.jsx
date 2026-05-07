@@ -5,39 +5,41 @@ import {
 
 const GraficoRadarDesempeno = ({ data }) => {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 h-full flex flex-col">
-      <div className="mb-4">
-        <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Huella Pedagógica</h3>
-        <p className="text-[10px] text-slate-500 font-bold uppercase">% de logro por indicador (Nivel 3+)</p>
+    <div className="bg-[#121316] p-8 rounded-lg border border-white/10 h-full flex flex-col">
+      <div className="mb-6">
+        <h3 className="text-sm font-bold text-white uppercase tracking-widest">Huella Pedagógica</h3>
+        <p className="text-[10px] text-slate-500 font-medium uppercase mt-1">% de logro por indicador (Nivel 3+)</p>
       </div>
 
-      <div className="flex-1 min-h-[300px]">
+      <div className="flex-1 min-h-[350px]">
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-            <PolarGrid stroke="#e2e8f0" />
+          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+            <PolarGrid stroke="rgba(255, 255, 255, 0.05)" />
             <PolarAngleAxis 
               dataKey="subject" 
-              tick={{ fill: '#64748b', fontSize: 11, fontWeight: 800 }} 
+              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }} 
             />
             <PolarRadiusAxis 
               angle={30} 
               domain={[0, 100]} 
-              tick={{ fill: '#cbd5e1', fontSize: 10 }}
+              tick={{ fill: '#334155', fontSize: 9 }}
+              axisLine={false}
             />
             <Radar
               name="Logro %"
               dataKey="A"
-              stroke="#0ea5e9"
-              fill="#0ea5e9"
-              fillOpacity={0.3}
+              stroke="#5e6ad2"
+              fill="#5e6ad2"
+              fillOpacity={0.2}
+              strokeWidth={2}
             />
             <Tooltip 
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="bg-white p-3 border border-slate-100 rounded-xl shadow-sm">
-                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">{payload[0].payload.nombre}</p>
-                      <p className="text-sm font-black text-sky-600">{payload[0].value}% de Logro</p>
+                    <div className="bg-[#1a1b1e] p-3 border border-white/10 rounded-md shadow-2xl">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{payload[0].payload.nombre}</p>
+                      <p className="text-sm font-bold text-[#5e6ad2]">{payload[0].value}% de Logro</p>
                     </div>
                   );
                 }
