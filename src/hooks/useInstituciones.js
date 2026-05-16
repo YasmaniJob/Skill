@@ -3,14 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'react-hot-toast';
 
-const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-const SERVICE_ROLE_KEY = (import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '').trim();
-
-const adminClient = SERVICE_ROLE_KEY
-  ? createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    })
-  : null;
+// Eliminado adminClient para mejorar seguridad. 
+// Toda la lógica administrativa ahora se maneja vía RPC en el servidor.
 
 export const useInstituciones = () => {
   const [instituciones, setInstituciones] = useState([]);
@@ -48,61 +42,24 @@ export const useInstituciones = () => {
    * Usa Admin API para crear el usuario auth — garantiza auth.identities → login funciona.
    */
   const createInstitucion = async ({ nombre, codigo_minedu, direccion, ugel, admin_email, admin_nombre, admin_dni }) => {
-    if (!adminClient) {
-      toast.error('Service role key no configurado.');
-      return false;
-    }
     try {
-      const paddedDni = String(admin_dni || '').trim().padStart(8, '0');
-      const cleanEmail = admin_email.trim().toLowerCase();
+      const { data, error } = await supabase.rpc('crear_ie_con_admin', {
+        p_nombre: nombre,
+        p_admin_email: admin_email,
+        p_admin_nombre: admin_nombre,
+        p_admin_dni: admin_dni,
+        p_codigo_minedu: codigo_minedu || null,
+        p_direccion: direccion || null,
+        p_ugel: ugel || null
+      });
 
-      // 1. Crear la IE
-      const { data: ie, error: ieError } = await supabase
-        .from('instituciones_educativas')
-        .insert([{
-          nombre,
-          codigo_minedu: codigo_minedu || null,
-          direccion: direccion || null,
-          ugel: ugel || null,
-        }])
-        .select('id')
-        .single();
-      if (ieError) throw ieError;
+      if (error) throw error;
 
-      // 2. Crear usuario admin via Admin API (crea auth.identities correctamente)
-      let authUserId;
-      const { data: { users }, error: listError } = await adminClient.auth.admin.listUsers();
-      if (listError) throw listError;
-      const existing = users?.find(u => u.email === cleanEmail);
-
-      if (existing) {
-        authUserId = existing.id;
-        await adminClient.auth.admin.updateUserById(authUserId, { password: paddedDni });
-      } else {
-        const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-          email: cleanEmail,
-          password: paddedDni,
-          email_confirm: true,
-          user_metadata: { nombre: admin_nombre },
-        });
-        if (createError) throw createError;
-        authUserId = newUser.user.id;
+      if (data && !data.success) {
+        throw new Error(data.error || 'Error desconocido al crear la IE');
       }
 
-      // 3. Crear perfil admin vinculado a la IE
-      const { error: perfilError } = await supabase
-        .from('perfiles')
-        .upsert([{
-          auth_user_id: authUserId,
-          rol: 'admin',
-          nombre: admin_nombre.trim(),
-          dni: paddedDni,
-          ie_id: ie.id,
-          debe_cambiar_pass: true,
-        }], { onConflict: 'auth_user_id' });
-      if (perfilError) throw perfilError;
-
-      toast.success(`IE "${nombre}" creada. Admin: ${cleanEmail} · Contraseña inicial: DNI ${paddedDni}`);
+      toast.success(data.message || `IE "${nombre}" creada exitosamente.`);
       fetchInstituciones();
       return true;
     } catch (error) {
