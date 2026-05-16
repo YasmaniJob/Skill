@@ -146,6 +146,7 @@ const DashboardIE = () => {
           </button>
         </div>
       </div>
+    </div>
 
       {/* Filtros Compact */}
       <AnimatePresence>
