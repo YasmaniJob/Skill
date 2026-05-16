@@ -1,23 +1,27 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { FileSpreadsheet } from 'lucide-react';
+import { INDICADORES } from '../../data/indicadores';
 
 const ExportarExcel = ({ monitoreos }) => {
   const handleExport = () => {
-    const data = monitoreos.map(m => ({
-      Fecha: m.fecha,
-      Docente: m.nombre_docente,
-      DNI: m.dni_docente,
-      Area: m.area,
-      Grado: m.grado,
-      Seccion: m.seccion,
-      I1: m.involucra_estudiantes,
-      I2: m.promueve_razonamiento,
-      I3: m.evalua_progreso,
-      I4: m.propicia_ambiente,
-      I5: m.regula_comportamiento,
-      Promedio: ((m.involucra_estudiantes + m.promueve_razonamiento + m.evalua_progreso + m.propicia_ambiente + m.regula_comportamiento) / 5).toFixed(2)
-    }));
+    const data = monitoreos.map(m => {
+      const scores = INDICADORES.map(ind => m[ind.id] ?? 0);
+      const promedio = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+      const indicadorCols = Object.fromEntries(
+        INDICADORES.map((ind, i) => [`I${i + 1}`, m[ind.id]])
+      );
+      return {
+        Fecha: m.fecha,
+        Docente: m.nombre_docente,
+        DNI: m.dni_docente,
+        Area: m.area,
+        Grado: m.grado,
+        Seccion: m.seccion,
+        ...indicadorCols,
+        Promedio: promedio,
+      };
+    });
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();

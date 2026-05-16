@@ -2,24 +2,21 @@ import { useState, useMemo } from 'react';
 import { useMonitoreos } from '../../hooks/useMonitoreos';
 import { useAuth } from '../../hooks/useAuth.jsx';
 import { usePeriodos } from '../../hooks/usePeriodos';
-import { NIVELES } from '../../data/indicadores';
+import { INDICADORES, NIVELES } from '../../data/indicadores';
 import { AREAS } from '../../data/areas';
 import { Trash2, Search, CalendarRange, Filter, ChevronLeft, ChevronRight, MoreHorizontal, User } from 'lucide-react';
 import Select from 'react-select';
 import { clsx } from 'clsx';
 
-const NIVEL_COLORS = {
-  1: 'bg-rose-600 text-white border-rose-700',
-  2: 'bg-amber-500 text-white border-amber-600',
-  3: 'bg-blue-600 text-white border-blue-700',
-  4: 'bg-emerald-600 text-white border-emerald-700',
-};
+const NIVEL_COLORS = Object.fromEntries(
+  Object.entries(NIVELES).map(([k, v]) => [Number(k), v.solid])
+);
 
 const TablaMonitoreos = () => {
   const { periodos } = usePeriodos();
   const [filters, setFilters] = useState({ nombre: '', area: '', periodo_id: '' });
   const { monitoreos, loading, deleteMonitoreo } = useMonitoreos(filters);
-  const { user, esAdmin } = useAuth();
+  const { user, perfil, esAdmin } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -137,10 +134,10 @@ const TablaMonitoreos = () => {
                 <tr><td colSpan="11" className="px-8 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs italic">No se encontraron resultados</td></tr>
               ) : (
                 paginatedData.map(m => {
-                  const scores = [m.involucra_estudiantes, m.promueve_razonamiento, m.evalua_progreso, m.propicia_ambiente, m.regula_comportamiento];
-                  const prom = scores.reduce((a, b) => a + b, 0) / 5;
+                  const scores = INDICADORES.map(ind => m[ind.id]);
+                  const prom = scores.reduce((a, b) => a + b, 0) / scores.length;
                   const promBg = prom >= 3.5 ? 'bg-emerald-50 text-emerald-700' : prom >= 2.5 ? 'bg-blue-50 text-blue-700' : prom >= 1.5 ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700';
-                  const canDelete = esAdmin || (user && m.registrado_por === user.id);
+                  const canDelete = esAdmin || (perfil && m.registrado_por === perfil.id);
 
                   return (
                     <tr key={m.id} className="hover:bg-slate-50/50 transition-colors group">
@@ -172,11 +169,9 @@ const TablaMonitoreos = () => {
                           {m.periodo?.nombre ?? '—'}
                         </span>
                       </td>
-                      <td className="px-4 py-5"><IndicatorBadge value={m.involucra_estudiantes} /></td>
-                      <td className="px-4 py-5"><IndicatorBadge value={m.promueve_razonamiento} /></td>
-                      <td className="px-4 py-5"><IndicatorBadge value={m.evalua_progreso} /></td>
-                      <td className="px-4 py-5"><IndicatorBadge value={m.propicia_ambiente} /></td>
-                      <td className="px-4 py-5"><IndicatorBadge value={m.regula_comportamiento} /></td>
+                      {INDICADORES.map(ind => (
+                        <td key={ind.id} className="px-4 py-5"><IndicatorBadge value={m[ind.id]} /></td>
+                      ))}
                       <td className="px-8 py-5 text-center">
                         <div className={clsx('inline-block px-3 py-1.5 rounded-md text-sm font-black min-w-[50px]', promBg)}>
                           {prom.toFixed(1)}

@@ -7,7 +7,7 @@ const ExportarPDF = ({ monitoreos }) => {
   return (
     <PDFDownloadLink
       document={<DocumentoReporte monitoreos={monitoreos} />}
-      fileName={`Reporte_MonitorED_${new Date().getTime()}.pdf`}
+      fileName={`Reporte_Skill_${new Date().getTime()}.pdf`}
       className="w-full"
     >
       {({ blob, url, loading, error }) => (

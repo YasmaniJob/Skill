@@ -4,6 +4,7 @@ import { Heading } from '../pdfx/heading/pdfx-heading';
 import { Text } from '../pdfx/text/pdfx-text';
 import { Stack } from '../pdfx/stack/pdfx-stack';
 import { PdfxThemeProvider } from '../../lib/pdfx-theme-context';
+import { INDICADORES } from '../../data/indicadores';
 
 const styles = StyleSheet.create({
   page: {
@@ -76,9 +77,9 @@ const DocumentoReporte = ({ monitoreos }) => {
             <Stack direction="horizontal" justify="between" align="center">
               <Stack gap="none">
                 <Heading level={2} color="primary" transform="uppercase" tracking="wide">
-                  MonitorED — Reporte Pedagógico
+                  Skill — Reporte Pedagógico
                 </Heading>
-                <Text variant="xs" color="muted">Sistema de Gestión de Acompañamiento 2026</Text>
+                <Text variant="xs" color="muted">Sistema de Gestión de Acompañamiento {new Date().getFullYear()}</Text>
               </Stack>
               <Text variant="xs" color="muted">Generado el {fechaGeneracion}</Text>
             </Stack>
@@ -94,7 +95,8 @@ const DocumentoReporte = ({ monitoreos }) => {
               <Text variant="xs" weight="bold" color="muted" transform="uppercase">Rendimiento Promedio</Text>
               <Heading level={3} noMargin>
                 {(monitoreos.reduce((acc, m) => {
-                  const p = (m.involucra_estudiantes + m.promueve_razonamiento + m.evalua_progreso + m.propicia_ambiente + m.regula_comportamiento) / 5;
+                  const scores = INDICADORES.map(ind => m[ind.id] ?? 0);
+                  const p = scores.reduce((a, b) => a + b, 0) / scores.length;
                   return acc + p;
                 }, 0) / (monitoreos.length || 1)).toFixed(2)}
               </Heading>
@@ -116,7 +118,8 @@ const DocumentoReporte = ({ monitoreos }) => {
             </View>
 
             {monitoreos.map((m, idx) => {
-              const prom = (m.involucra_estudiantes + m.promueve_razonamiento + m.evalua_progreso + m.propicia_ambiente + m.regula_comportamiento) / 5;
+              const scores = INDICADORES.map(ind => m[ind.id] ?? 0);
+              const prom = scores.reduce((a, b) => a + b, 0) / scores.length;
               return (
                 <View key={m.id} style={[styles.tableRow, idx % 2 === 0 ? {} : { backgroundColor: '#FBFCFD' }]}>
                   <View style={[styles.tableCol, { width: '8%' }]}><Text style={styles.tableCell}>{m.fecha}</Text></View>
@@ -129,11 +132,11 @@ const DocumentoReporte = ({ monitoreos }) => {
                   <View style={styles.tableColWide}>
                     <Text style={styles.tableCell}>{m.area} ({m.grado}-{m.seccion})</Text>
                   </View>
-                  <View style={styles.tableCol}><Text style={styles.tableCell} align="center">{m.involucra_estudiantes}</Text></View>
-                  <View style={styles.tableCol}><Text style={styles.tableCell} align="center">{m.promueve_razonamiento}</Text></View>
-                  <View style={styles.tableCol}><Text style={styles.tableCell} align="center">{m.evalua_progreso}</Text></View>
-                  <View style={styles.tableCol}><Text style={styles.tableCell} align="center">{m.propicia_ambiente}</Text></View>
-                  <View style={styles.tableCol}><Text style={styles.tableCell} align="center">{m.regula_comportamiento}</Text></View>
+                  {INDICADORES.map((ind, i) => (
+                    <View key={ind.id} style={styles.tableCol}>
+                      <Text style={styles.tableCell} align="center">{m[ind.id]}</Text>
+                    </View>
+                  ))}
                   <View style={styles.tableCol}>
                     <Text style={[styles.tableCell, { fontWeight: 'bold', color: prom >= 3 ? '#059669' : '#DC2626' }]} align="center">
                       {prom.toFixed(1)}
@@ -147,7 +150,7 @@ const DocumentoReporte = ({ monitoreos }) => {
           {/* Footer Informativo */}
           <View style={{ marginTop: 50, borderTopWidth: 1, borderTopColor: '#F1F5F9', paddingTop: 20 }}>
             <Text variant="xs" color="muted" align="center italic">
-              Este reporte es un documento generado por el sistema MonitorED y tiene carácter informativo para la gestión pedagógica.
+            Este reporte es un documento generado por el sistema Skill y tiene carácter informativo para la gestión pedagógica.
             </Text>
           </View>
 

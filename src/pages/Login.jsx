@@ -1,20 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { showErrorToast, getErrorMessage } from '../lib/errorUtils';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabaseClient';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
+  const [dbEmpty, setDbEmpty] = useState(false);
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const checkDB = async () => {
+      const { data, error } = await supabase.rpc('db_is_empty');
+      if (!error && data) setDbEmpty(true);
+    };
+    checkDB();
+  }, []);
+
   if (user) return <Navigate to="/" replace />;
+  if (dbEmpty) return <Navigate to="/setup" replace />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,7 +131,7 @@ const Login = () => {
         <div className="mt-12 text-center space-y-4">
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
             Exclusivo para instituciones educativas<br/>
-            del Perú &copy; 2026
+            del Perú &copy; {new Date().getFullYear()}
           </p>
         </div>
       </motion.div>

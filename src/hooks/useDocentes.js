@@ -1,16 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from './useAuth.jsx';
 import { toast } from 'react-hot-toast';
 
 export const useDocentes = () => {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { ieId } = useAuth();
 
   const fetchDocentes = useCallback(async () => {
+    if (!ieId) { setDocentes([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase
       .from('docentes')
       .select('*')
+      .eq('ie_id', ieId)
       .order('nombre_completo', { ascending: true });
 
     if (error) {
@@ -20,7 +24,7 @@ export const useDocentes = () => {
       setDocentes(data || []);
     }
     setLoading(false);
-  }, []);
+  }, [ieId]);
 
   useEffect(() => {
     fetchDocentes();
@@ -30,8 +34,9 @@ export const useDocentes = () => {
     // Asegurar que el DNI tenga 8 dígitos
     const cleanDocente = { 
       ...docente, 
-      dni: String(docente.dni).trim().padStart(8, '0') 
+      dni: String(docente.dni).trim().padStart(8, '0'),
     };
+    if (ieId) cleanDocente.ie_id = ieId;
     const { error } = await supabase
       .from('docentes')
       .upsert([cleanDocente], { onConflict: 'dni' });
@@ -63,9 +68,12 @@ export const useDocentes = () => {
 
   // Función para carga masiva
   const bulkUpsertDocentes = async (docentesList) => {
+    const docentesConIE = ieId
+      ? docentesList.map(d => ({ ...d, ie_id: ieId }))
+      : docentesList;
     const { error } = await supabase
       .from('docentes')
-      .upsert(docentesList, { onConflict: 'dni' });
+      .upsert(docentesConIE, { onConflict: 'dni' });
 
     if (error) {
       console.error(error);

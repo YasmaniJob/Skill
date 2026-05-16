@@ -1,4 +1,3 @@
-// Generado automáticamente desde MONITOREO DOCENTE 2026.xlsm → hoja Config
 export const AREAS = [
   "Matemática",
   "Comunicación",

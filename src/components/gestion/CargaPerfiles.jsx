@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAdminUsuarios } from '../../hooks/useAdminUsuarios';
+import { useAuth } from '../../hooks/useAuth.jsx';
 import { supabase } from '../../lib/supabaseClient';
 import * as XLSX from 'xlsx';
-import { ShieldCheck, Upload, Save, Loader2, AlertTriangle, Users, Plus, ArrowLeft, Download, Pencil, Trash2, X } from 'lucide-react';
+import { ShieldCheck, Upload, Save, Loader2, Users, Plus, ArrowLeft, Download, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { clsx } from 'clsx';
 import EditarPerfilDrawer from './EditarPerfilDrawer';
 
 const CargaPerfiles = () => {
-  const { upsertUsuario, bulkUpsertUsuarios, loading: isSaving } = useAdminUsuarios();
+  const { upsertUsuario, bulkUpsertUsuarios, eliminarUsuario, loading: isSaving } = useAdminUsuarios();
+  const { ieId, esSuperAdmin } = useAuth();
   const [perfiles, setPerfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -19,15 +21,18 @@ const CargaPerfiles = () => {
 
   const [formData, setFormData] = useState({ email: '', dni: '', nombre: '', rol: 'coordinador' });
 
-  const fetchPerfiles = async () => {
+  const fetchPerfiles = useCallback(async () => {
     setLoading(true);
-    // Intentamos traer el DNI también (asumiendo que se agregará la columna)
-    const { data } = await supabase.from('perfiles').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('perfiles').select('*').order('created_at', { ascending: false });
+    if (!esSuperAdmin && ieId) {
+      query = query.eq('ie_id', ieId);
+    }
+    const { data } = await query;
     setPerfiles(data || []);
     setLoading(false);
-  };
+  }, [ieId, esSuperAdmin]);
 
-  useEffect(() => { fetchPerfiles(); }, []);
+  useEffect(() => { fetchPerfiles(); }, [fetchPerfiles]);
 
   const handleManualSubmit = async (e) => {
     e.preventDefault();
@@ -44,16 +49,11 @@ const CargaPerfiles = () => {
   const startEdit = (p) => setEditingPerfil(p);
 
   const handleDelete = async (id, nombre) => {
-    if (!window.confirm(`¿Eliminar acceso de "${nombre || 'este usuario'}"? Esta acción no eliminará su cuenta de autenticación.`)) return;
+    if (!window.confirm(`¿Eliminar a "${nombre || 'este usuario'}" del sistema?\n\nSe eliminará su acceso y cuenta de autenticación. Los monitoreos registrados se conservan.`)) return;
     setDeletingId(id);
-    const { error } = await supabase.from('perfiles').delete().eq('id', id);
+    const ok = await eliminarUsuario(id, nombre);
     setDeletingId(null);
-    if (error) {
-      toast.error('Error al eliminar: ' + error.message);
-    } else {
-      toast.success('Acceso eliminado del sistema');
-      fetchPerfiles();
-    }
+    if (ok) fetchPerfiles();
   };
 
   const handleDownloadTemplate = () => {
@@ -126,20 +126,6 @@ const CargaPerfiles = () => {
   return (
     <>
     <div className="space-y-6">
-      {/* Aviso de Seguridad */}
-      {!import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
-          <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0" />
-          <div>
-            <h4 className="font-bold text-amber-800">Advertencia de Seguridad (Service Role Key)</h4>
-            <p className="text-sm text-amber-700 mt-1">
-              Para crear usuarios desde este panel, asegúrate de haber configurado <code>VITE_SUPABASE_SERVICE_ROLE_KEY</code> en tu archivo <code>.env</code>. 
-              Esta función crea credenciales reales de acceso al sistema.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Barra de Acciones */}
       {view === 'list' && (
         <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 gap-4">

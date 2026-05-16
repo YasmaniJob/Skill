@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { clsx } from 'clsx';
+import { useAuth } from '../hooks/useAuth.jsx';
 import { useMonitoreos } from '../hooks/useMonitoreos';
 import { usePeriodos } from '../hooks/usePeriodos';
 import { useDocentes } from '../hooks/useDocentes';
@@ -7,6 +8,7 @@ import ResumenCards from '../components/dashboard/ResumenCards';
 import GraficoDonaItem from '../components/dashboard/GraficoDonaItem';
 import GraficoRadarDesempeno from '../components/dashboard/GraficoRadarDesempeno';
 import GraficoRankingNiveles from '../components/dashboard/GraficoRankingNiveles';
+import DashboardSuperAdmin from './DashboardSuperAdmin';
 
 import { AREAS } from '../data/areas';
 import { GRADOS } from '../data/grados';
@@ -24,6 +26,15 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
+  const { esSuperAdmin } = useAuth();
+
+  // El super_admin tiene su propio dashboard
+  if (esSuperAdmin) return <DashboardSuperAdmin />;
+
+  return <DashboardIE />;
+};
+
+const DashboardIE = () => {
   const { periodos } = usePeriodos();
   const { docentes } = useDocentes();
   const [filters, setFilters] = useState({
@@ -62,7 +73,7 @@ const Dashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Panel de Control</h1>
-            <p className="text-slate-400 font-bold text-[9px] mt-1 uppercase tracking-widest">Análisis Pedagógico 2026</p>
+            <p className="text-slate-400 font-bold text-[9px] mt-1 uppercase tracking-widest">Análisis Pedagógico {new Date().getFullYear()}</p>
           </div>
           
           <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">

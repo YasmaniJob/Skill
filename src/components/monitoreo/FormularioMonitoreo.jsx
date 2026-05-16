@@ -18,12 +18,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { es } from 'date-fns/locale';
 
-const NIVEL_STYLES = {
-  1: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', active: 'bg-rose-600 text-white border-rose-600' },
-  2: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', active: 'bg-amber-500 text-white border-amber-500' },
-  3: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', active: 'bg-blue-600 text-white border-blue-600' },
-  4: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', active: 'bg-emerald-600 text-white border-emerald-600' },
-};
+
 
 const FormularioMonitoreo = ({ externalPeriodoId }) => {
   const { periodosActivos, loading: loadingPeriodos } = usePeriodos();
@@ -245,7 +240,7 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
                   <div className="flex items-center bg-slate-100 p-1.5 rounded-lg border border-slate-200">
                     {[1, 2, 3, 4].map(valor => {
                       const isSelected = formData[ind.id] === valor;
-                      const style = NIVEL_STYLES[valor];
+                      const nivel = NIVELES[valor];
                       return (
                         <button
                           key={valor}
@@ -253,8 +248,8 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
                           onClick={() => handleIndicatorChange(ind.id, valor)}
                           className={clsx(
                             'relative flex flex-col items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-lg transition-all duration-200 border-2',
-                            isSelected 
-                              ? style.active
+                            isSelected
+                              ? nivel.active
                               : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-100 hover:text-indigo-400'
                           )}
                         >
@@ -265,7 +260,7 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
                             "text-[9px] font-black uppercase tracking-tighter mt-2 px-1 text-center leading-tight",
                             isSelected ? "text-white" : "text-slate-400"
                           )}>
-                            {NIVELES[valor].etiqueta}
+                            {nivel.etiqueta}
                           </span>
                         </button>
                       );
@@ -299,12 +294,12 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4 border-t border-slate-200">
           <div className="flex items-center gap-4 text-slate-400">
             <div className="flex -space-x-2">
-              {[1,2,3,4,5].map(i => (
-                <div key={i} className={clsx("w-3 h-3 rounded-full border-2 border-white", i <= INDICADORES.filter(ind => formData[ind.id] > 0).length ? "bg-indigo-500" : "bg-slate-200")} />
+              {INDICADORES.map((ind, i) => (
+                <div key={i} className={clsx("w-3 h-3 rounded-full border-2 border-white", formData[ind.id] > 0 ? "bg-indigo-500" : "bg-slate-200")} />
               ))}
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest">
-              {INDICADORES.filter(ind => formData[ind.id] > 0).length} de 5 Indicadores completados
+              {INDICADORES.filter(ind => formData[ind.id] > 0).length} de {INDICADORES.length} Indicadores completados
             </span>
           </div>
 

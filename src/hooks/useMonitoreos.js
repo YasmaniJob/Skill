@@ -7,7 +7,7 @@ import { showErrorToast } from '../lib/errorUtils';
 export const useMonitoreos = (filters = {}) => {
   const [monitoreos, setMonitoreos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, perfil, ieId } = useAuth();
 
   const fetchMonitoreos = useCallback(async () => {
     try {
@@ -54,9 +54,11 @@ export const useMonitoreos = (filters = {}) => {
 
   const addMonitoreo = async (data) => {
     try {
+      const insertData = { ...data, registrado_por: perfil?.id ?? null };
+      if (ieId) insertData.ie_id = ieId;
       const { error } = await supabase
         .from('monitoreos')
-        .insert([{ ...data, registrado_por: user.id }]);
+        .insert([insertData]);
 
       if (error) throw error;
       toast.success('Registro guardado exitosamente');

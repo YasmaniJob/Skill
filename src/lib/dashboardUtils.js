@@ -76,7 +76,7 @@ export const getKPIs = (monitoreos) => {
   const totalMonitoreos = monitoreos.length;
   if (totalMonitoreos === 0) return { total: 0, n1: 0, n2: 0, n3: 0, n4: 0 };
 
-  const totalItemsObservados = totalMonitoreos * 5; // 5 indicadores por cada monitoreo
+  const totalItemsObservados = totalMonitoreos * INDICADORES.length;
   const counts = { n1: 0, n2: 0, n3: 0, n4: 0 };
 
   monitoreos.forEach(m => {

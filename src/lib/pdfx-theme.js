@@ -64,7 +64,7 @@ export const theme = {
     background: "#ffffff",
     muted: "#f4f4f5",
     mutedForeground: "#71717a",
-    primary: "#4f46e5", // Cambiado a Indigo para MonitorED
+    primary: "#4f46e5",
     primaryForeground: "#ffffff",
     border: "#e4e4e7",
     accent: "#3b82f6",

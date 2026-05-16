@@ -6,9 +6,10 @@ import { toast } from 'react-hot-toast';
 export const usePeriodos = () => {
   const [periodos, setPeriodos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, perfil, ieId } = useAuth();
 
   const fetchPeriodos = useCallback(async () => {
+    if (!ieId) { setPeriodos([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase
       .from('periodos_monitoreo')
@@ -16,6 +17,7 @@ export const usePeriodos = () => {
         *,
         total_monitoreos:monitoreos(count)
       `)
+      .eq('ie_id', ieId)
       .order('anio', { ascending: false })
       .order('numero_visita', { ascending: true });
 
@@ -26,15 +28,17 @@ export const usePeriodos = () => {
       setPeriodos(data || []);
     }
     setLoading(false);
-  }, []);
+  }, [ieId]);
 
-  useEffect(() => { fetchPeriodos(); }, [fetchPeriodos]);
+  useEffect(() => { fetchPeriodos(); }, [fetchPeriodos, ieId]);
 
   const createPeriodo = async (formData) => {
     const nombre = `Visita ${formData.numero_visita} - ${formData.anio}`;
+    const insertData = { ...formData, nombre, registrado_por: perfil?.id };
+    if (ieId) insertData.ie_id = ieId;
     const { error } = await supabase
       .from('periodos_monitoreo')
-      .insert([{ ...formData, nombre, creado_por: user.id }]);
+      .insert([insertData]);
 
     if (error) {
       console.error(error);

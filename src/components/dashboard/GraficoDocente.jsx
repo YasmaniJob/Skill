@@ -1,10 +1,11 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { INDICADORES } from '../../data/indicadores';
 
 const GraficoDocente = ({ monitoreos }) => {
-  // Calculate average per teacher
   const teacherStats = {};
   monitoreos.forEach(m => {
-    const avg = (m.involucra_estudiantes + m.promueve_razonamiento + m.evalua_progreso + m.propicia_ambiente + m.regula_comportamiento) / 5;
+    const scores = INDICADORES.map(ind => m[ind.id] ?? 0);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
     if (!teacherStats[m.nombre_docente]) {
       teacherStats[m.nombre_docente] = { sum: 0, count: 0 };
     }

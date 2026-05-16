@@ -13,8 +13,8 @@ export const AuthProvider = ({ children }) => {
     const { data } = await supabase
       .from('perfiles')
       .select('*')
-      .eq('id', userId)
-      .single();
+      .eq('auth_user_id', userId)
+      .maybeSingle();
     setPerfil(data || null);
   };
 
@@ -55,11 +55,13 @@ export const AuthProvider = ({ children }) => {
 
   // Helpers de rol
   const rol = perfil?.rol ?? null;
+  const ieId = perfil?.ie_id ?? null;
+  const esSuperAdmin = rol === 'super_admin';
   const esAdmin = rol === 'admin';
   const esDirectivo = ['admin', 'director', 'subdirector'].includes(rol);
 
   return (
-    <AuthContext.Provider value={{ user, perfil, rol, esAdmin, esDirectivo, loading, login, logout, refreshPerfil }}>
+    <AuthContext.Provider value={{ user, perfil, rol, ieId, esSuperAdmin, esAdmin, esDirectivo, loading, login, logout, refreshPerfil }}>
       {children}
     </AuthContext.Provider>
   );
