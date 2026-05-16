@@ -71,9 +71,19 @@ export const useDocentes = () => {
     const docentesConIE = ieId
       ? docentesList.map(d => ({ ...d, ie_id: ieId }))
       : docentesList;
+    // Deduplicar la lista por DNI antes de enviar a Supabase para evitar el error 21000
+    // (ON CONFLICT DO UPDATE cannot affect row a second time)
+    const uniqueDocentes = Array.from(
+      docentesConIE.reduce((map, item) => {
+        const dni = String(item.dni).trim().padStart(8, '0');
+        map.set(dni, { ...item, dni });
+        return map;
+      }, new Map()).values()
+    );
+
     const { error } = await supabase
       .from('docentes')
-      .upsert(docentesConIE, { onConflict: 'dni' });
+      .upsert(uniqueDocentes, { onConflict: 'dni' });
 
     if (error) {
       console.error(error);
