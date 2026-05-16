@@ -424,6 +424,15 @@ BEGIN
     jsonb_build_object('nombre', p_nombre)
   ) RETURNING id INTO v_auth_id;
 
+  -- Crear identidad (OBLIGATORIO para evitar "Database error querying schema")
+  INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+  ) VALUES (
+    gen_random_uuid(), v_auth_id, 
+    jsonb_build_object('sub', v_auth_id, 'email', lower(trim(p_email))),
+    'email', lower(trim(p_email)), now(), now(), now()
+  );
+
   -- Crear perfil vinculado
   INSERT INTO public.perfiles (auth_user_id, rol, nombre, dni, ie_id, debe_cambiar_pass)
   VALUES (v_auth_id, p_rol, p_nombre, v_padded_dni, v_target_ie, true)
@@ -493,6 +502,15 @@ BEGIN
       '{"provider":"email","providers":["email"]}',
       jsonb_build_object('nombre', p_admin_nombre)
     ) RETURNING id INTO v_auth_id;
+
+    -- Crear identidad (OBLIGATORIO para evitar "Database error querying schema")
+    INSERT INTO auth.identities (
+      id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+    ) VALUES (
+      gen_random_uuid(), v_auth_id, 
+      jsonb_build_object('sub', v_auth_id, 'email', lower(trim(p_admin_email))),
+      'email', lower(trim(p_admin_email)), now(), now(), now()
+    );
 
     INSERT INTO public.perfiles (auth_user_id, rol, nombre, dni, ie_id, debe_cambiar_pass)
     VALUES (v_auth_id, 'admin', p_admin_nombre, v_padded_dni, v_ie_id, true)
