@@ -29,6 +29,13 @@ export const useMonitoreos = (filters = {}) => {
       if (filters.nombre)     query = query.ilike('nombre_docente', `%${filters.nombre}%`);
       if (filters.fechaDesde) query = query.gte('fecha', filters.fechaDesde);
       if (filters.fechaHasta) query = query.lte('fecha', filters.fechaHasta);
+      
+      // Filtro por monitor (quien registra)
+      if (filters.solo_mis_registros && perfil?.id) {
+        query = query.eq('registrado_por', perfil.id);
+      } else if (filters.registrado_por) {
+        query = query.eq('registrado_por', filters.registrado_por);
+      }
 
       const { data, error } = await query;
       if (error) throw error;
@@ -48,6 +55,9 @@ export const useMonitoreos = (filters = {}) => {
     filters.nombre,
     filters.fechaDesde,
     filters.fechaHasta,
+    filters.solo_mis_registros,
+    filters.registrado_por,
+    perfil?.id,
   ]);
 
   useEffect(() => { fetchMonitoreos(); }, [fetchMonitoreos]);

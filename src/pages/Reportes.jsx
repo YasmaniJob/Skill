@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { clsx } from 'clsx';
 import { useMonitoreos } from '../hooks/useMonitoreos';
 import ExportarExcel from '../components/reportes/ExportarExcel';
 import ExportarPDF from '../components/reportes/ExportarPDF';
@@ -17,6 +18,7 @@ const Reportes = () => {
     area: '',
     fechaDesde: '',
     fechaHasta: '',
+    solo_mis_registros: true, // Por defecto, ver lo propio
   });
 
   const { monitoreos, loading } = useMonitoreos(filters);
@@ -125,6 +127,31 @@ const Reportes = () => {
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-indigo-500 transition-all"
                   wrapperClassName="w-full"
                 />
+              </div>
+
+              {/* Toggle Vista */}
+              <div className="pt-4 border-t border-slate-100">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3 block">Modo de Reporte</label>
+                <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">
+                  <button
+                    onClick={() => setFilters(f => ({ ...f, solo_mis_registros: true }))}
+                    className={clsx(
+                      "flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
+                      filters.solo_mis_registros ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700"
+                    )}
+                  >
+                    Personal
+                  </button>
+                  <button
+                    onClick={() => setFilters(f => ({ ...f, solo_mis_registros: false }))}
+                    className={clsx(
+                      "flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
+                      !filters.solo_mis_registros ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700"
+                    )}
+                  >
+                    Institucional
+                  </button>
+                </div>
               </div>
             </div>
           </div>

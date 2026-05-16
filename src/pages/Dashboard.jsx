@@ -45,6 +45,7 @@ const DashboardIE = () => {
     docente_id: '',
     fechaDesde: '',
     fechaHasta: '',
+    solo_mis_registros: true, // Por defecto, ver lo propio
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -57,10 +58,13 @@ const DashboardIE = () => {
   };
 
   const clearFilters = () => setFilters({ 
-    periodo_id: '', area: '', grado: '', seccion: '', docente_id: '', fechaDesde: '', fechaHasta: '' 
+    periodo_id: '', area: '', grado: '', seccion: '', docente_id: '', fechaDesde: '', fechaHasta: '',
+    solo_mis_registros: filters.solo_mis_registros // Mantener el modo de vista
   });
 
-  const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
+  const activeFiltersCount = Object.entries(filters)
+    .filter(([key, value]) => key !== 'solo_mis_registros' && value !== '')
+    .length;
 
   const distribucion = getDistribucionPorIndicador(monitoreos);
   const datosRadar = getLogroPorIndicador(monitoreos);
@@ -72,8 +76,12 @@ const DashboardIE = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Panel de Control</h1>
-            <p className="text-slate-400 font-bold text-[9px] mt-1 uppercase tracking-widest">Análisis Pedagógico {new Date().getFullYear()}</p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
+              {filters.solo_mis_registros ? 'Mi Gestión Pedagógica' : 'Panel Institucional'}
+            </h1>
+            <p className="text-slate-400 font-bold text-[9px] mt-1 uppercase tracking-widest">
+              {filters.solo_mis_registros ? 'Monitoreos realizados por ti' : `Consolidado General ${new Date().getFullYear()}`}
+            </p>
           </div>
           
           <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
@@ -87,7 +95,30 @@ const DashboardIE = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-0">
+        <div className="flex items-center gap-2">
+          {/* Toggle Vista */}
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              onClick={() => setFilters(f => ({ ...f, solo_mis_registros: true }))}
+              className={clsx(
+                "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                filters.solo_mis_registros ? "bg-white shadow-sm text-[#4f46e5]" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              Personal
+            </button>
+            <button
+              onClick={() => setFilters(f => ({ ...f, solo_mis_registros: false }))}
+              className={clsx(
+                "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                !filters.solo_mis_registros ? "bg-white shadow-sm text-[#4f46e5]" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              Institucional
+            </button>
+          </div>
+
+          <div className="flex items-center gap-0">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={clsx(
