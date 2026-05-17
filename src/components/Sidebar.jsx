@@ -36,6 +36,7 @@ const Sidebar = () => {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,19 +57,38 @@ const Sidebar = () => {
     const iosDetected = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(iosDetected);
 
-    // 3. Capturar el prompt de instalación de Chrome/Edge/Android
+    // 3. Revisar memoria local si el usuario ya descartó la invitación
+    const dismissed = localStorage.getItem('pwa_install_dismissed') === 'true';
+    setIsDismissed(dismissed);
+
+    // 4. Capturar el prompt de instalación de Chrome/Edge/Android
     const handleBeforeInstall = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
 
+    // 5. Escuchar instalación exitosa para quitar el banner en el acto
+    const handleAppInstalled = () => {
+      setIsInstallable(false);
+      localStorage.setItem('pwa_install_dismissed', 'true');
+      setIsDismissed(true);
+      console.log('App instalada con éxito y banner ocultado.');
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
+
+  const handleDismiss = () => {
+    localStorage.setItem('pwa_install_dismissed', 'true');
+    setIsDismissed(true);
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -150,11 +170,19 @@ const Sidebar = () => {
           </nav>
 
           {/* Banner de Instalación PWA */}
-          {!isStandalone && (
+          {!isStandalone && !isDismissed && (
             <div className="px-4 space-y-3">
               {isInstallable && (
-                <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex flex-col gap-2">
-                  <p className="text-[9px] font-black text-indigo-900 uppercase tracking-widest leading-none">
+                <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex flex-col gap-2 relative group/banner">
+                  {/* Botón de Cerrar */}
+                  <button
+                    onClick={handleDismiss}
+                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors cursor-pointer"
+                    title="Ocultar invitación"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  <p className="text-[9px] font-black text-indigo-900 uppercase tracking-widest leading-none pr-6">
                     App disponible
                   </p>
                   <p className="text-[9px] text-slate-500 leading-normal font-bold">
@@ -171,8 +199,16 @@ const Sidebar = () => {
               )}
 
               {isIOS && (
-                <div className="p-3.5 bg-indigo-50/30 border border-indigo-100/30 rounded-xl flex flex-col gap-1.5">
-                  <p className="text-[9px] font-black text-indigo-900 uppercase tracking-widest leading-none">
+                <div className="p-3.5 bg-indigo-50/30 border border-indigo-100/30 rounded-xl flex flex-col gap-1.5 relative">
+                  {/* Botón de Cerrar */}
+                  <button
+                    onClick={handleDismiss}
+                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors cursor-pointer"
+                    title="Ocultar invitación"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  <p className="text-[9px] font-black text-indigo-900 uppercase tracking-widest leading-none pr-6">
                     📱 Instalar en tu iPhone
                   </p>
                   <p className="text-[9.5px] text-slate-500 leading-relaxed font-semibold">
