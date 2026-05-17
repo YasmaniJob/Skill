@@ -1,0 +1,18 @@
+{
+  "short_name": "Skill",
+  "name": "Skill - Gestión de Acompañamiento",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FFFFFF",
+  "theme_color": "#4F46E5",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/"
+}

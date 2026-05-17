@@ -1,16 +1,33 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { FileSpreadsheet } from 'lucide-react';
-import { INDICADORES } from '../../data/indicadores';
+import { INDICADORES, NIVELES } from '../../data/indicadores';
 
 const ExportarExcel = ({ monitoreos }) => {
   const handleExport = () => {
+    const MAP_INDICADORES_NOMBRES = {
+      'IE': 'INVOLUCRA (I1)',
+      'PR': 'PROMUEVE (I2)',
+      'EP': 'EVALÚA (I3)',
+      'PA': 'PROPICIA (I4)',
+      'RC': 'REGULA (I5)'
+    };
+
     const data = monitoreos.map(m => {
       const scores = INDICADORES.map(ind => m[ind.id] ?? 0);
       const promedio = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
-      const indicadorCols = Object.fromEntries(
-        INDICADORES.map((ind, i) => [`I${i + 1}`, m[ind.id]])
-      );
+      const levelNum = Math.round(Number(promedio));
+      const nivelLogro = NIVELES[levelNum]?.etiqueta?.toUpperCase() || 'SUFICIENTE';
+
+      const indicadorCols = {};
+      INDICADORES.forEach(ind => {
+        const val = m[ind.id] ?? 0;
+        const levelInfo = NIVELES[Math.round(val)]?.etiqueta?.toUpperCase() || '—';
+        const labelCol = MAP_INDICADORES_NOMBRES[ind.abrev] || ind.nombre;
+        
+        indicadorCols[labelCol] = `${val} - ${levelInfo}`;
+      });
+
       return {
         Fecha: m.fecha,
         Docente: m.nombre_docente,
@@ -19,7 +36,8 @@ const ExportarExcel = ({ monitoreos }) => {
         Grado: m.grado,
         Seccion: m.seccion,
         ...indicadorCols,
-        Promedio: promedio,
+        Promedio: Number(promedio),
+        'Nivel de Logro': nivelLogro
       };
     });
 

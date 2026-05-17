@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth.jsx';
 import {
-  Building2, Users, ClipboardList, CalendarDays,
-  TrendingUp, AlertTriangle, CheckCircle2, Loader2,
-  ToggleRight, ToggleLeft, ArrowRight, RefreshCcw,
+  Building2, Users, ClipboardList, Loader2,
+  ToggleRight, ToggleLeft, ArrowRight, RefreshCcw, CheckCircle2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -30,7 +29,6 @@ const StatCard = ({ icon: Icon, label, value, color = 'indigo' }) => {
 };
 
 const DashboardSuperAdmin = () => {
-  const { perfil } = useAuth();
   const [stats, setStats] = useState(null);
   const [instituciones, setInstituciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,29 +36,27 @@ const DashboardSuperAdmin = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [{ data: ies }, { count: totalDocentes }, { count: totalMonitoreos }, { count: totalPeriodos }] =
-        await Promise.all([
-          supabase
-            .from('instituciones_educativas')
-            .select(`
-              id, nombre, codigo_minedu, ugel, estado,
-              total_docentes:docentes(count),
-              total_monitoreos:monitoreos(count),
-              total_periodos:periodos_monitoreo(count)
-            `)
-            .order('nombre', { ascending: true }),
-          supabase.from('docentes').select('*', { count: 'exact', head: true }),
-          supabase.from('monitoreos').select('*', { count: 'exact', head: true }),
-          supabase.from('periodos_monitoreo').select('*', { count: 'exact', head: true }),
-        ]);
+      const [iesRes, docentesRes, monitoreosRes, periodosRes] = await Promise.all([
+        supabase.from('instituciones').select('*').order('nombre'),
+        supabase.from('docentes').select('*', { count: 'exact', head: true }),
+        supabase.from('monitoreos').select('*', { count: 'exact', head: true }),
+        supabase.from('periodos').select('*', { count: 'exact', head: true }),
+      ]);
 
-      setInstituciones(ies || []);
+      if (iesRes.error) throw iesRes.error;
+      if (docentesRes.error) throw docentesRes.error;
+      if (monitoreosRes.error) throw monitoreosRes.error;
+      if (periodosRes.error) throw periodosRes.error;
+
+      const ies = iesRes.data || [];
+
+      setInstituciones(ies);
       setStats({
-        totalIEs: ies?.length ?? 0,
-        iesActivas: ies?.filter(i => i.estado === 'activo').length ?? 0,
-        totalDocentes: totalDocentes ?? 0,
-        totalMonitoreos: totalMonitoreos ?? 0,
-        totalPeriodos: totalPeriodos ?? 0,
+        totalIEs: ies.length,
+        iesActivas: ies.filter(i => i.estado === 'activo').length,
+        totalDocentes: docentesRes.count || 0,
+        totalMonitoreos: monitoreosRes.count || 0,
+        totalPeriodos: periodosRes.count || 0,
       });
     } catch (err) {
       console.error('Error cargando stats super admin:', err);
@@ -133,9 +129,6 @@ const DashboardSuperAdmin = () => {
               <tr>
                 <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institución</th>
                 <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden md:table-cell">UGEL</th>
-                <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Docentes</th>
-                <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Monitoreos</th>
-                <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Periodos</th>
                 <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</th>
               </tr>
             </thead>
@@ -162,15 +155,6 @@ const DashboardSuperAdmin = () => {
                   <td className="px-4 py-3 text-sm text-slate-500 hidden md:table-cell">
                     {ie.ugel || <span className="text-slate-300">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-sm text-center font-bold text-slate-700">
-                    {ie.total_docentes?.[0]?.count ?? 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center font-bold text-slate-700">
-                    {ie.total_monitoreos?.[0]?.count ?? 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center font-bold text-slate-700">
-                    {ie.total_periodos?.[0]?.count ?? 0}
-                  </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${
                       ie.estado === 'activo'
@@ -188,7 +172,7 @@ const DashboardSuperAdmin = () => {
               ))}
               {instituciones.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-16 text-center">
+                  <td colSpan={3} className="px-4 py-16 text-center">
                     <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-3" />
                     <p className="text-sm text-slate-400 font-medium">No hay instituciones registradas</p>
                     <Link to="/instituciones" className="text-[11px] font-bold text-[#4f46e5] hover:underline mt-1 inline-block">

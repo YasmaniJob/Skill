@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAdminUsuarios } from '../../hooks/useAdminUsuarios';
 import { useAuth } from '../../hooks/useAuth.jsx';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import * as XLSX from 'xlsx';
 import { ShieldCheck, Upload, Save, Loader2, Users, Plus, ArrowLeft, Download, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -23,13 +23,26 @@ const CargaPerfiles = () => {
 
   const fetchPerfiles = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from('perfiles').select('*').order('created_at', { ascending: false });
-    if (!esSuperAdmin && ieId) {
-      query = query.eq('ie_id', ieId);
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .neq('rol', 'super_admin')
+        .order('created_at', { ascending: false });
+
+      if (!esSuperAdmin && ieId) {
+        query = query.eq('ie_id', ieId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      setPerfiles(data || []);
+    } catch (error) {
+      console.error('Error fetching perfiles:', error);
+    } finally {
+      setLoading(false);
     }
-    const { data } = await query;
-    setPerfiles(data || []);
-    setLoading(false);
   }, [ieId, esSuperAdmin]);
 
   useEffect(() => { fetchPerfiles(); }, [fetchPerfiles]);
@@ -208,7 +221,7 @@ const CargaPerfiles = () => {
                 <button 
                   onClick={handleConfirmUpload} 
                   disabled={isSaving}
-                  className="btn-primary bg-purple-600 hover:bg-purple-700 py-2 flex items-center gap-2"
+                  className="btn-primary bg-purple-600 hover:bg-purple-700 py-2 flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Confirmar y Cargar {previewData.length} usuarios

@@ -1,70 +1,75 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { Lock, Mail, User, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
 const FirstSetup = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState('check');
+  const [step, setStep] = useState('check'); // 'check' | 'form' | 'error'
   const [formData, setFormData] = useState({ nombre: '', email: '', password: '', confirmPassword: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isComplete, setIsComplete] = useState(false);
 
+  // Verificar si ya hay un super_admin — si hay, ir al login
   useEffect(() => {
     const check = async () => {
-      const { data, error } = await supabase.rpc('db_is_empty');
-      if (error) { setError('No se pudo verificar el estado de la DB'); setStep('error'); return; }
-      setStep(data ? 'form' : 'redirect');
+      try {
+        const { data: isSetupDone, error: checkErr } = await supabase.rpc('is_setup_complete');
+        if (checkErr) throw checkErr;
+        if (isSetupDone) {
+          navigate('/login', { replace: true });
+        } else {
+          setStep('form');
+        }
+      } catch (err) {
+        console.error('Error checking setup:', err);
+        setError('No se pudo conectar con la base de datos. Verifica las variables de entorno.');
+        setStep('error');
+      }
     };
     check();
-  }, []);
-
-  useEffect(() => {
-    if (step === 'redirect') navigate('/login', { replace: true });
-  }, [step, navigate]);
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
     if (formData.password !== formData.confirmPassword) { setError('Las contraseñas no coinciden'); return; }
-    if (formData.password.length < 6) { setError('Minimo 6 caracteres'); return; }
+    if (formData.password.length < 8) { setError('Mínimo 8 caracteres'); return; }
     if (!formData.nombre || !formData.email) { setError('Nombre y email son obligatorios'); return; }
 
     setIsLoading(true);
     try {
-      // 1. Crear el usuario en auth (el trigger handle_new_user crea el perfil automáticamente)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // 1. Registrar en Supabase Auth (requiere email confirmation desactivado)
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: { data: { nombre: formData.nombre } }
       });
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-      // 2. Si signUp no inició sesión (email confirmation activo), hacer signIn explícito
-      if (!authData.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (signInError) throw signInError;
-      }
+      if (signUpError) throw signUpError;
+      if (!signUpData.user) throw new Error('No se recibió respuesta del servidor de autenticación.');
 
-      // 3. Promover a super_admin (ON CONFLICT actualiza el perfil creado por el trigger)
-      const { data: rpcData, error: rpcError } = await supabase.rpc('register_first_admin', {
-        p_nombre: formData.nombre,
-      });
-      if (rpcError) throw rpcError;
-      if (!rpcData?.success) throw new Error(rpcData?.error || 'Error al registrar el perfil');
+      // 2. Con sesión activa (email confirmation OFF), actualizar el perfil a super_admin
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          nombre: formData.nombre,
+          rol: 'super_admin',
+          debe_cambiar_pass: false,
+        })
+        .eq('id', signUpData.user.id);
 
-      // 4. Cerrar sesión para que el usuario haga login normal
+      if (profileError) throw profileError;
+
+      // 3. Cerrar sesión — el usuario deberá iniciar sesión formalmente
       await supabase.auth.signOut();
 
       setIsComplete(true);
-      toast.success('Super Admin creado');
+      toast.success('¡Super Admin creado! Inicia sesión con tus credenciales.');
       setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err) {
       setError(err.message || 'Error al crear el usuario');
@@ -73,9 +78,29 @@ const FirstSetup = () => {
     }
   };
 
-  if (step === 'check') return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#4f46e5]" /></div>;
-  if (step === 'error') return <div className="min-h-screen flex flex-col items-center justify-center"><AlertCircle className="w-10 h-10 text-red-400 mb-2"/><p className="text-sm text-slate-500">{error}</p></div>;
-  if (isComplete) return <div className="min-h-screen flex flex-col items-center justify-center"><CheckCircle2 className="w-12 h-12 text-green-500 mb-4"/><h2 className="text-xl font-bold">Configuracion completa</h2><p className="text-sm text-slate-500 mt-1">Redirigiendo...</p></div>;
+  if (step === 'check') return (
+    <div className="min-h-screen flex items-center justify-center bg-[#fcfcfc]">
+      <Loader2 className="w-8 h-8 animate-spin text-[#4f46e5]" />
+    </div>
+  );
+
+  if (step === 'error') return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#fcfcfc]">
+      <AlertCircle className="w-10 h-10 text-red-400 mb-2"/>
+      <p className="text-sm text-slate-500 max-w-xs">{error}</p>
+      <button onClick={() => window.location.reload()} className="mt-4 text-xs font-bold text-[#4f46e5] uppercase tracking-widest">
+        Reintentar
+      </button>
+    </div>
+  );
+
+  if (isComplete) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#fcfcfc]">
+      <CheckCircle2 className="w-12 h-12 text-green-500 mb-4"/>
+      <h2 className="text-xl font-bold">Configuración completa</h2>
+      <p className="text-sm text-slate-500 mt-1">Redirigiendo al login...</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] flex items-center justify-center p-6">
@@ -85,43 +110,61 @@ const FirstSetup = () => {
             <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Primer Registro</h1>
-          <p className="text-sm text-slate-500 mt-1 font-medium text-center">Crea la cuenta Super Admin</p>
+          <p className="text-sm text-slate-500 mt-1 font-medium text-center">
+            Crea la cuenta Super Admin de la plataforma
+          </p>
         </div>
 
         <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Nombre</label>
-              <div className="relative group">
+              <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input type="text" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="input-field pl-10" placeholder="Admin" />
+                <input type="text" required value={formData.nombre}
+                  onChange={e => setFormData({...formData, nombre: e.target.value})}
+                  className="input-field pl-10" placeholder="Nombre completo" />
               </div>
             </div>
+
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Email</label>
-              <div className="relative group">
+              <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="input-field pl-10" placeholder="admin@ejemplo.com" />
+                <input type="email" required value={formData.email}
+                  onChange={e => setFormData({...formData, email: e.target.value})}
+                  className="input-field pl-10" placeholder="admin@ejemplo.com" />
               </div>
             </div>
+
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Contraseña</label>
-              <div className="relative group">
+              <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input type="password" required minLength={6} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="input-field pl-10" placeholder="••••••••" />
+                <input type="password" required minLength={8} value={formData.password}
+                  onChange={e => setFormData({...formData, password: e.target.value})}
+                  className="input-field pl-10" placeholder="Mínimo 8 caracteres" />
               </div>
             </div>
+
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">Confirmar</label>
-              <div className="relative group">
+              <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input type="password" required minLength={6} value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} className="input-field pl-10" placeholder="••••••••" />
+                <input type="password" required minLength={8} value={formData.confirmPassword}
+                  onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                  className="input-field pl-10" placeholder="Repite la contraseña" />
               </div>
             </div>
 
-            {error && <div className="p-3 bg-red-50 border border-red-100 rounded-md text-red-600 text-[11px] font-bold flex items-center gap-2"><AlertCircle className="w-4 h-4" />{error}</div>}
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-100 rounded-md text-red-600 text-[11px] font-bold flex items-center gap-2 leading-tight">
+                <AlertCircle className="w-4 h-4 shrink-0" />{error}
+              </div>
+            )}
 
-            <button type="submit" disabled={isLoading} className="btn-primary w-full py-2.5 rounded-md text-sm font-bold flex items-center justify-center gap-2 mt-4">
+            <button type="submit" disabled={isLoading}
+              className="btn-primary w-full py-2.5 rounded-md text-sm font-bold flex items-center justify-center gap-2 mt-4">
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Crear Super Admin'}
             </button>
           </form>

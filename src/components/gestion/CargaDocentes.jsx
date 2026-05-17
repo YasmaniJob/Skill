@@ -169,9 +169,10 @@ const CargaDocentes = () => {
                 </button>
                 <button 
                   onClick={handleConfirmUpload} 
-                  className="btn-primary bg-green-600 hover:bg-green-700 py-2 flex items-center gap-2"
+                  disabled={loading}
+                  className="btn-primary bg-green-600 hover:bg-green-700 py-2 flex items-center gap-2 disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Confirmar y Cargar {previewData.length} docentes
                 </button>
               </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import { useAdminUsuarios } from '../../hooks/useAdminUsuarios';
-import { X, Save, Loader2, User, RefreshCw, AlertTriangle, IdCard } from 'lucide-react';
+import { X, Save, Loader2, RefreshCw, IdCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { clsx } from 'clsx';
 
@@ -23,14 +23,24 @@ const EditarPerfilDrawer = ({ perfil, onClose, onSaved }) => {
   const handleSaveProfile = async () => {
     if (!nombre.trim()) return toast.error('El nombre no puede estar vacío');
     setSavingProfile(true);
-    const { error } = await supabase
-      .from('perfiles')
-      .update({ nombre: nombre.trim(), rol, dni: dni.trim().padStart(8, '0') })
-      .eq('id', perfil.id);
-    setSavingProfile(false);
-    if (error) { toast.error('Error: ' + error.message); return; }
-    toast.success('Perfil actualizado');
-    onSaved();
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          nombre: nombre.trim(),
+          rol,
+          dni: dni.trim().padStart(8, '0')
+        })
+        .eq('id', perfil.id);
+
+      if (error) throw error;
+      toast.success('Perfil actualizado');
+      onSaved();
+    } catch (error) {
+      toast.error('Error al actualizar perfil: ' + error.message);
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleResetToDNI = async () => {
@@ -42,8 +52,6 @@ const EditarPerfilDrawer = ({ perfil, onClose, onSaved }) => {
     setResetting(false);
     if (ok) onSaved();
   };
-
-  const rolActual = ROLES.find(r => r.value === rol);
 
   return (
     <>

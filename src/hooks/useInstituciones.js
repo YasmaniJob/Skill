@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
-
-// Eliminado adminClient para mejorar seguridad. 
-// Toda la lógica administrativa ahora se maneja vía RPC en el servidor.
 
 export const useInstituciones = () => {
   const [instituciones, setInstituciones] = useState([]);
@@ -12,73 +8,88 @@ export const useInstituciones = () => {
 
   const fetchInstituciones = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('instituciones_educativas')
-      .select(`
-        *,
-        total_docentes:docentes(count),
-        total_monitoreos:monitoreos(count),
-        admin:perfiles!perfiles_ie_id_fkey(id, nombre, dni, rol)
-      `)
-      .order('nombre', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('instituciones')
+        .select('*, profiles!ie_id(*)')
+        .order('nombre');
 
-    if (error) {
-      console.error('Error fetching instituciones:', error);
-      toast.error('Error al cargar las instituciones');
-    } else {
+      if (error) throw error;
+
+      // Procesar para que coincida con la estructura esperada por la UI
       const iesConAdmin = (data || []).map(ie => ({
         ...ie,
-        admin: ie.admin?.find(p => p.rol === 'admin') ?? null,
+        admin: ie.profiles?.find(u => u.rol === 'admin') ?? null,
+        total_docentes: 0,
+        total_monitoreos: 0
       }));
+
       setInstituciones(iesConAdmin);
+    } catch (error) {
+      console.error('Error fetching instituciones:', error);
+      toast.error('Error al cargar las instituciones');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => { fetchInstituciones(); }, [fetchInstituciones]);
 
-  /**
-   * Crea una IE y su admin.
-   * Usa Admin API para crear el usuario auth — garantiza auth.identities → login funciona.
-   */
   const createInstitucion = async ({ nombre, codigo_minedu, direccion, ugel, admin_email, admin_nombre, admin_dni }) => {
     try {
-      const { data, error } = await supabase.rpc('crear_ie_con_admin', {
-        p_nombre: nombre,
-        p_admin_email: admin_email,
-        p_admin_nombre: admin_nombre,
-        p_admin_dni: admin_dni,
-        p_codigo_minedu: codigo_minedu || null,
-        p_direccion: direccion || null,
-        p_ugel: ugel || null
-      });
+      // 1. Crear la Institución
+      const { data: ie, error: ieError } = await supabase
+        .from('instituciones')
+        .insert({
+          nombre,
+          codigo_minedu,
+          direccion,
+          ugel,
+          estado: 'activo'
+        })
+        .select('id')
+        .single();
 
-      if (error) throw error;
+      if (ieError) throw ieError;
 
-      if (data && !data.success) {
-        throw new Error(data.error || 'Error desconocido al crear la IE');
-      }
+      // 2. Crear el usuario Admin para esa IE llamando a la función RPC
+      const { error: rpcError } = await supabase
+        .rpc('create_institutional_user', {
+          p_email: admin_email,
+          p_password: admin_dni, // contraseña inicial = DNI
+          p_nombre: admin_nombre,
+          p_dni: admin_dni,
+          p_rol: 'admin',
+          p_ie_id: ie.id
+        });
 
-      toast.success(data.message || `IE "${nombre}" creada exitosamente.`);
+      if (rpcError) throw rpcError;
+
+      toast.success(`IE "${nombre}" creada exitosamente.`);
       fetchInstituciones();
       return true;
     } catch (error) {
-      console.error('Error creando IE:', error);
+      console.error('Error creando IE en Supabase:', error);
       toast.error(`Error al crear la IE: ${error.message}`);
       return false;
     }
   };
 
   const toggleEstado = async (id, estadoActual) => {
-    const nuevoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
-    const { error } = await supabase
-      .from('instituciones_educativas')
-      .update({ estado: nuevoEstado })
-      .eq('id', id);
+    try {
+      const nuevoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
+      const { error } = await supabase
+        .from('instituciones')
+        .update({ estado: nuevoEstado })
+        .eq('id', id);
 
-    if (error) { toast.error('Error al actualizar estado'); return; }
-    toast.success(nuevoEstado === 'activo' ? 'IE activada' : 'IE desactivada');
-    fetchInstituciones();
+      if (error) throw error;
+      
+      toast.success(nuevoEstado === 'activo' ? 'IE activada' : 'IE desactivada');
+      fetchInstituciones();
+    } catch (error) {
+      toast.error('Error al actualizar estado');
+    }
   };
 
   return { instituciones, loading, createInstitucion, toggleEstado, refresh: fetchInstituciones };

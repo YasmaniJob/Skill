@@ -11,9 +11,6 @@ const Gestion = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Personal</h1>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-          Administración de docentes y accesos al sistema
-        </p>
       </div>
 
       <div className="flex border-b border-slate-200">

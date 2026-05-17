@@ -1,31 +1,47 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { supabase } from '../lib/supabase';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { showErrorToast, getErrorMessage } from '../lib/errorUtils';
 import { motion } from 'framer-motion';
-import { supabase } from '../lib/supabaseClient';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
-  const [dbEmpty, setDbEmpty] = useState(false);
+  const [checking, setChecking] = useState(true);
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
+  // 1. Declarar todos los Hooks arriba del componente (Reglas de React Hooks)
   useEffect(() => {
-    const checkDB = async () => {
-      const { data, error } = await supabase.rpc('db_is_empty');
-      if (!error && data) setDbEmpty(true);
+    const checkSetup = async () => {
+      try {
+        const { data: isComplete, error } = await supabase.rpc('is_setup_complete');
+        if (!error && !isComplete) {
+          navigate('/setup', { replace: true });
+        }
+      } catch (err) {
+        console.warn('No se pudo verificar setup:', err);
+      } finally {
+        setChecking(false);
+      }
     };
-    checkDB();
-  }, []);
+    checkSetup();
+  }, [navigate]);
 
+  // 2. Colocar los Retornos Tempranos CONDICIONALES después de declarar todos los hooks
   if (user) return <Navigate to="/" replace />;
-  if (dbEmpty) return <Navigate to="/setup" replace />;
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#fcfcfc]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#4f46e5]" />
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,8 +54,7 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       console.error(error);
-      showErrorToast(error, 'Error al iniciar sesión');
-      setAuthError(getErrorMessage(error));
+      setAuthError('Credenciales incorrectas o error de conexión');
     } finally {
       setIsLoading(false);
     }

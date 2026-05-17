@@ -1,23 +1,23 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const INDICATOR_THEMES = {
-  'IE': { bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-800', accent: 'bg-indigo-600' },
-  'PR': { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-800', accent: 'bg-blue-600' },
-  'EP': { bg: 'bg-violet-50', border: 'border-violet-100', text: 'text-violet-800', accent: 'bg-violet-600' },
-  'PA': { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-800', accent: 'bg-emerald-600' },
-  'RC': { bg: 'bg-cyan-50', border: 'border-cyan-100', text: 'text-cyan-800', accent: 'bg-cyan-600' },
+  'IE': { bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-800', accent: 'bg-indigo-600', shortName: 'INVOLUCRA' },
+  'PR': { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-800', accent: 'bg-blue-600', shortName: 'PROMUEVE' },
+  'EP': { bg: 'bg-violet-50', border: 'border-violet-100', text: 'text-violet-800', accent: 'bg-violet-600', shortName: 'EVALÚA' },
+  'PA': { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-800', accent: 'bg-emerald-600', shortName: 'PROPICIA' },
+  'RC': { bg: 'bg-cyan-50', border: 'border-cyan-100', text: 'text-cyan-800', accent: 'bg-cyan-600', shortName: 'REGULA' },
 };
 
 const GraficoDonaItem = ({ indicador }) => {
   const { nombre, abrev, data, total } = indicador;
-  const theme = INDICATOR_THEMES[abrev] || { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-800', accent: 'bg-[#4f46e5]' };
+  const theme = INDICATOR_THEMES[abrev] || { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-800', accent: 'bg-[#4f46e5]', shortName: abrev };
 
   return (
     <div className={`${theme.bg} p-6 rounded-lg border ${theme.border} flex flex-col items-center transition-all hover:bg-white group`}>
       {/* Header con Contraste */}
       <div className="text-center mb-6">
         <div className={`inline-block px-2.5 py-1 ${theme.accent} text-white text-[9px] font-black uppercase tracking-[0.2em] mb-3 rounded`}>
-          {abrev}
+          {theme.shortName}
         </div>
         <p className="text-[11px] font-bold text-slate-800 leading-tight h-10 flex items-center justify-center px-1">
           {nombre}
@@ -25,7 +25,15 @@ const GraficoDonaItem = ({ indicador }) => {
       </div>
 
       <div className="relative w-full h-44">
-        <ResponsiveContainer width="100%" height="100%">
+        {/* Centro de la Dona con Máxima Legibilidad (colocado abajo en el eje Z) */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+          <div className="bg-white/80 backdrop-blur-sm w-16 h-16 rounded-full flex flex-col items-center justify-center">
+            <span className="text-2xl font-black text-slate-900 tracking-tighter leading-none">{total}</span>
+            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Total</span>
+          </div>
+        </div>
+
+        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} className="relative z-10">
           <PieChart>
             <Pie
               data={data}
@@ -45,6 +53,7 @@ const GraficoDonaItem = ({ indicador }) => {
               ))}
             </Pie>
             <Tooltip 
+              wrapperStyle={{ zIndex: 100 }}
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   const { name, value, fill } = payload[0].payload;
@@ -66,14 +75,6 @@ const GraficoDonaItem = ({ indicador }) => {
             />
           </PieChart>
         </ResponsiveContainer>
-        
-        {/* Centro de la Dona con Máxima Legibilidad */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div className="bg-white/80 backdrop-blur-sm w-16 h-16 rounded-full flex flex-col items-center justify-center">
-            <span className="text-2xl font-black text-slate-900 tracking-tighter leading-none">{total}</span>
-            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Total</span>
-          </div>
-        </div>
       </div>
 
       {/* Leyenda con Contraste */}

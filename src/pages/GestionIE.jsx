@@ -60,9 +60,6 @@ const GestionIE = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Instituciones Educativas</h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Gestión de IEs y administradores
-          </p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary flex items-center gap-2 text-sm font-bold">
           <Plus className="w-4 h-4" /> Nueva IE
@@ -208,14 +205,14 @@ const GestionIE = () => {
                   {/* Docentes */}
                   <td className="px-4 py-3 text-center">
                     <span className="text-sm font-bold text-slate-700">
-                      {ie.total_docentes?.[0]?.count ?? 0}
+                      {ie.total_docentes ?? 0}
                     </span>
                   </td>
 
                   {/* Monitoreos */}
                   <td className="px-4 py-3 text-center">
                     <span className="text-sm font-bold text-slate-700">
-                      {ie.total_monitoreos?.[0]?.count ?? 0}
+                      {ie.total_monitoreos ?? 0}
                     </span>
                   </td>
 

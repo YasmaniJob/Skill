@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Lock, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -10,7 +10,7 @@ const CambiarPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { refreshPerfil } = useAuth();
+  const { user, refreshPerfil } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,28 +18,27 @@ const CambiarPassword = () => {
     if (password !== confirmPassword) {
       return toast.error('Las contraseñas no coinciden');
     }
-    if (password.length < 6) {
-      return toast.error('La contraseña debe tener al menos 6 caracteres');
+    if (password.length < 8) {
+      return toast.error('La contraseña debe tener al menos 8 caracteres');
     }
 
     setLoading(true);
 
     try {
-      // 1. Actualizar contraseña en Auth
-      const { data: authData, error: authError } = await supabase.auth.updateUser({
+      // 1. Actualizar contraseña en Supabase Auth
+      const { error: authError } = await supabase.auth.updateUser({
         password: password
       });
-
       if (authError) throw authError;
 
-      // 2. Marcar bandera via RPC (bypasa RLS para cualquier rol)
-      const { data: rpcData, error: profileError } = await supabase
-        .rpc('skip_password_change');
-
+      // 2. Actualizar bandera debe_cambiar_pass en la tabla profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ debe_cambiar_pass: false })
+        .eq('id', user.id);
       if (profileError) throw profileError;
-      if (!rpcData?.success) throw new Error(rpcData?.error || 'Error al actualizar perfil');
 
-      // 3. Cerrar sesión para forzar login con nueva contraseña
+      // 3. Cerrar sesión para forzar login con la nueva contraseña
       await supabase.auth.signOut();
 
       toast.success('¡Contraseña actualizada! Inicia sesión con tu nueva contraseña.');
@@ -47,7 +46,7 @@ const CambiarPassword = () => {
 
     } catch (error) {
       console.error(error);
-      toast.error('Error al actualizar la contraseña.');
+      toast.error('Error al actualizar la contraseña: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -56,16 +55,14 @@ const CambiarPassword = () => {
   const handleSkip = async () => {
     setLoading(true);
     try {
-      // RPC con SECURITY DEFINER: bypasa RLS para actualizar debe_cambiar_pass
-      const { data: rpcData, error: rpcError } = await supabase
-        .rpc('skip_password_change');
-
-      if (rpcError) throw rpcError;
-      if (!rpcData?.success) throw new Error(rpcData?.error || 'Error al actualizar perfil');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ debe_cambiar_pass: false })
+        .eq('id', user.id);
+      if (profileError) throw profileError;
 
       // Refrescar perfil en contexto ANTES de navegar para evitar loop
       await refreshPerfil();
-
       navigate('/', { replace: true });
 
     } catch (error) {
@@ -104,11 +101,11 @@ const CambiarPassword = () => {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#4f46e5] transition-all"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
               />
             </div>
           </div>
@@ -122,7 +119,7 @@ const CambiarPassword = () => {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#4f46e5] transition-all"

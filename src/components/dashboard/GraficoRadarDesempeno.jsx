@@ -1,53 +1,72 @@
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, 
-  PolarRadiusAxis, ResponsiveContainer, Tooltip 
-} from 'recharts';
+import React from 'react';
+import { clsx } from 'clsx';
 
 const GraficoRadarDesempeno = ({ data }) => {
+  // data is an array of 5 items: { subject: 'IE', nombre: '...', A: 85 }
+  
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-8">
+    <div className="h-full flex flex-col space-y-6">
+      <div>
         <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Huella Pedagógica</h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">% de logro por indicador (Nivel 3+)</p>
+        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Porcentaje de logro institucional por indicador (Nivel 3+)</p>
       </div>
 
-      <div className="flex-1 min-h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-            <PolarGrid stroke="#f1f5f9" />
-            <PolarAngleAxis 
-              dataKey="subject" 
-              tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} 
-            />
-            <PolarRadiusAxis 
-              angle={30} 
-              domain={[0, 100]} 
-              tick={{ fill: '#cbd5e1', fontSize: 9 }}
-              axisLine={false}
-            />
-            <Radar
-              name="Logro %"
-              dataKey="A"
-              stroke="#4f46e5"
-              fill="#4f46e5"
-              fillOpacity={0.15}
-              strokeWidth={3}
-            />
-            <Tooltip 
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-[#4f46e5] p-4 border border-[#4f46e5] text-white shadow-none rounded-lg">
-                      <p className="text-[10px] font-black uppercase tracking-wider mb-2">{payload[0].payload.nombre}</p>
-                      <p className="text-sm font-black text-white/90">{payload[0].value}% de Logro</p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
+      <div className="flex-1 space-y-6 pr-1">
+        {data.map((item, index) => {
+          const val = item.A;
+          
+          // Determinamos colores y clases según el porcentaje de logro
+          let badgeClass = "bg-rose-50 text-rose-700 border-rose-100";
+          let barClass = "from-rose-400 to-red-500 shadow-rose-200/50";
+          
+          if (val >= 75) {
+            badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-100";
+            barClass = "from-emerald-400 to-teal-500 shadow-emerald-200/50";
+          } else if (val >= 50) {
+            badgeClass = "bg-blue-50 text-blue-700 border-blue-100";
+            barClass = "from-blue-400 to-indigo-500 shadow-blue-200/50";
+          } else if (val >= 25) {
+            badgeClass = "bg-amber-50 text-amber-700 border-amber-100";
+            barClass = "from-amber-400 to-orange-500 shadow-amber-200/50";
+          }
+
+          return (
+            <div key={index} className="space-y-2.5 group transition-all duration-300">
+              {/* Etiqueta y porcentaje */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex gap-3 items-start">
+                  <div className="h-6 w-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-500 flex-shrink-0 mt-0.5 shadow-sm group-hover:border-indigo-500 group-hover:text-indigo-600 transition-all">
+                    {item.subject}
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black text-slate-800 tracking-tight leading-snug group-hover:text-indigo-600 transition-all">
+                      {item.nombre}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex-shrink-0">
+                  <span className={clsx(
+                    "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm block",
+                    badgeClass
+                  )}>
+                    {val}% LOGRO
+                  </span>
+                </div>
+              </div>
+
+              {/* Barra de progreso */}
+              <div className="relative">
+                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                  <div 
+                    className={clsx("h-full rounded-full bg-gradient-to-r shadow-md transition-all duration-1000 ease-out", barClass)}
+                    style={{ width: `${val}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ import { GRADOS } from '../data/grados';
 import { SECCIONES } from '../data/secciones';
 import { 
   Filter, RefreshCcw, CalendarRange, User, 
-  ClipboardCheck
+  ClipboardCheck, Trash2
 } from 'lucide-react';
 import { 
   getDistribucionPorIndicador, 
@@ -88,9 +88,9 @@ const DashboardIE = () => {
             <div className="p-1.5 bg-[#4f46e5]/10 text-[#4f46e5] rounded">
               <ClipboardCheck className="w-3.5 h-3.5" />
             </div>
-            <div>
+            <div className="flex items-baseline gap-1.5">
               <p className="text-lg font-black text-slate-900 leading-none">{monitoreos.length}</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Monitoreos</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Monitoreos</p>
             </div>
           </div>
         </div>
@@ -157,7 +157,7 @@ const DashboardIE = () => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-8"
           >
-            <div className="bg-white p-6 rounded-lg border border-slate-200">
+            <div className="bg-white p-6 rounded-lg border border-slate-200 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Periodo</label>
@@ -200,6 +200,18 @@ const DashboardIE = () => {
                   </select>
                 </div>
               </div>
+
+              {activeFiltersCount > 0 && (
+                <div className="flex justify-end pt-3 border-t border-slate-100">
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100/70 border border-rose-100 hover:border-rose-200 text-rose-600 transition-all font-black text-[9px] uppercase tracking-[0.15em] rounded-lg"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Limpiar Filtros
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

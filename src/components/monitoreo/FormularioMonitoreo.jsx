@@ -58,11 +58,27 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
 
   const handleDocenteSelect = (selectedOption) => {
     if (selectedOption) {
+      const rawArea = selectedOption.docente.area_principal || '';
+      
+      // Mapear de forma flexible e insensible a mayúsculas/acentos/siglas
+      const matchedArea = AREAS.find(a => {
+        const normA = a.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const normRaw = rawArea.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        
+        if (normRaw === 'ccss' && normA.includes('ciencias sociales')) return true;
+        if (normRaw === 'cyt' && normA.includes('ciencia y tecnologia')) return true;
+        if (normRaw === 'ept' && normA.includes('educacion para el trabajo')) return true;
+        if (normRaw === 'dpcc' && normA.includes('desarrollo personal')) return true;
+        if (normRaw === 'ef' && normA.includes('educacion fisica')) return true;
+        
+        return normA === normRaw || normA.includes(normRaw) || normRaw.includes(normA);
+      });
+
       setFormData(prev => ({
         ...prev,
         dni_docente: selectedOption.docente.dni,
         nombre_docente: selectedOption.docente.nombre_completo,
-        area: selectedOption.docente.area_principal || prev.area
+        area: matchedArea || prev.area
       }));
     } else {
       setFormData(prev => ({ ...prev, dni_docente: '', nombre_docente: '' }));
@@ -184,7 +200,19 @@ const FormularioMonitoreo = ({ externalPeriodoId }) => {
                 options={areaOptions}
                 placeholder="Área..."
                 styles={customSelectStyles}
-                value={areaOptions.find(o => o.value === formData.area)}
+                value={areaOptions.find(o => {
+                  if (!formData.area) return false;
+                  const normO = o.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                  const normF = formData.area.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                  
+                  if (normF === 'ccss' && normO.includes('ciencias sociales')) return true;
+                  if (normF === 'cyt' && normO.includes('ciencia y tecnologia')) return true;
+                  if (normF === 'ept' && normO.includes('educacion para el trabajo')) return true;
+                  if (normF === 'dpcc' && normO.includes('desarrollo personal')) return true;
+                  if (normF === 'ef' && normO.includes('educacion fisica')) return true;
+                  
+                  return normO === normF || normO.includes(normF) || normF.includes(normO);
+                }) || null}
                 onChange={(opt) => setFormData(prev => ({ ...prev, area: opt?.value || '' }))}
               />
             </div>

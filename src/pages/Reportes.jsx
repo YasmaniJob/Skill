@@ -60,141 +60,123 @@ const Reportes = () => {
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Reportes y Exportación</h1>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Generación de documentos oficiales del monitoreo</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
-        
-        {/* Sidebar de Configuración */}
-        <div className="lg:col-span-1 space-y-8">
-          <div className="bg-white p-8 rounded-xl border border-slate-200">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-4 w-1 bg-indigo-600 rounded-full" />
-              <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Configurar Reporte</h3>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Periodo Escolar</label>
-                <Select
-                  options={periodoOptions}
-                  value={periodoOptions.find(o => o.value === filters.periodo_id)}
-                  onChange={(opt) => setFilters(prev => ({ ...prev, periodo_id: opt?.value || '' }))}
-                  styles={customSelectStyles}
-                  placeholder="Seleccionar..."
-                />
-              </div>
+      {/* Barra de Filtros Horizontal - Premium Grid */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
+          
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Periodo Escolar</label>
+            <Select
+              options={periodoOptions}
+              value={periodoOptions.find(o => o.value === filters.periodo_id)}
+              onChange={(opt) => setFilters(prev => ({ ...prev, periodo_id: opt?.value || '' }))}
+              styles={customSelectStyles}
+              placeholder="Seleccionar..."
+            />
+          </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Área Curricular</label>
-                <Select
-                  options={areaOptions}
-                  value={areaOptions.find(o => o.value === filters.area)}
-                  onChange={(opt) => setFilters(prev => ({ ...prev, area: opt?.value || '' }))}
-                  styles={customSelectStyles}
-                  placeholder="Seleccionar..."
-                />
-              </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Área Curricular</label>
+            <Select
+              options={areaOptions}
+              value={areaOptions.find(o => o.value === filters.area)}
+              onChange={(opt) => setFilters(prev => ({ ...prev, area: opt?.value || '' }))}
+              styles={customSelectStyles}
+              placeholder="Seleccionar..."
+            />
+          </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                  <Calendar className="w-3 h-3 text-indigo-600" /> Fecha Desde
-                </label>
-                <DatePicker
-                  selected={filters.fechaDesde ? new Date(filters.fechaDesde + 'T12:00:00') : null}
-                  onChange={(date) => setFilters(prev => ({ ...prev, fechaDesde: date ? date.toISOString().split('T')[0] : '' }))}
-                  locale={es}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="Seleccionar fecha..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-indigo-500 transition-all"
-                  wrapperClassName="w-full"
-                />
-              </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-indigo-600" /> Fecha Desde
+            </label>
+            <DatePicker
+              selected={filters.fechaDesde ? new Date(filters.fechaDesde + 'T12:00:00') : null}
+              onChange={(date) => setFilters(prev => ({ ...prev, fechaDesde: date ? date.toISOString().split('T')[0] : '' }))}
+              locale={es}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Seleccionar..."
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-indigo-500 transition-all h-[38px]"
+              wrapperClassName="w-full"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                  <Calendar className="w-3 h-3 text-indigo-600" /> Fecha Hasta
-                </label>
-                <DatePicker
-                  selected={filters.fechaHasta ? new Date(filters.fechaHasta + 'T12:00:00') : null}
-                  onChange={(date) => setFilters(prev => ({ ...prev, fechaHasta: date ? date.toISOString().split('T')[0] : '' }))}
-                  locale={es}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="Seleccionar fecha..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-indigo-500 transition-all"
-                  wrapperClassName="w-full"
-                />
-              </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-indigo-600" /> Fecha Hasta
+            </label>
+            <DatePicker
+              selected={filters.fechaHasta ? new Date(filters.fechaHasta + 'T12:00:00') : null}
+              onChange={(date) => setFilters(prev => ({ ...prev, fechaHasta: date ? date.toISOString().split('T')[0] : '' }))}
+              locale={es}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Seleccionar..."
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-indigo-500 transition-all h-[38px]"
+              wrapperClassName="w-full"
+            />
+          </div>
 
-              {/* Toggle Vista */}
-              <div className="pt-4 border-t border-slate-100">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3 block">Modo de Reporte</label>
-                <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">
-                  <button
-                    onClick={() => setFilters(f => ({ ...f, solo_mis_registros: true }))}
-                    className={clsx(
-                      "flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
-                      filters.solo_mis_registros ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700"
-                    )}
-                  >
-                    Personal
-                  </button>
-                  <button
-                    onClick={() => setFilters(f => ({ ...f, solo_mis_registros: false }))}
-                    className={clsx(
-                      "flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
-                      !filters.solo_mis_registros ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700"
-                    )}
-                  >
-                    Institucional
-                  </button>
-                </div>
-              </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Modo de Reporte</label>
+            <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200 h-[38px] items-center">
+              <button
+                onClick={() => setFilters(f => ({ ...f, solo_mis_registros: true }))}
+                className={clsx(
+                  "flex-1 h-full rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
+                  filters.solo_mis_registros ? "bg-white shadow-sm text-indigo-600 border border-slate-100" : "text-slate-500 hover:text-slate-700"
+                )}
+              >
+                Personal
+              </button>
+              <button
+                onClick={() => setFilters(f => ({ ...f, solo_mis_registros: false }))}
+                className={clsx(
+                  "flex-1 h-full rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
+                  !filters.solo_mis_registros ? "bg-white shadow-sm text-indigo-600 border border-slate-100" : "text-slate-500 hover:text-slate-700"
+                )}
+              >
+                Institucional
+              </button>
             </div>
           </div>
 
-          <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 flex gap-4">
-            <Info className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-            <div className="text-[11px] text-indigo-900 leading-relaxed font-bold uppercase tracking-tight">
-              Los documentos generados incluirán únicamente los registros que coincidan con los filtros activos.
-            </div>
+        </div>
+      </div>
+
+
+      {/* Panel de Descarga Centralizado */}
+      <div className="bg-white p-12 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center space-y-8 min-h-[420px]">
+        <div className="relative">
+          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center border border-indigo-100">
+            <FileBarChart className="w-9 h-9 text-indigo-600" />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center border-4 border-white">
+            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
           </div>
         </div>
+        
+        <div className="space-y-2">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Datos Sincronizados</h2>
+          <p className="text-sm font-bold text-slate-400">
+            Se han identificado <span className="text-indigo-600 px-2.5 py-0.5 bg-indigo-50 rounded mx-1 font-mono">{monitoreos.length} registros</span> listos para ser procesados.
+          </p>
+        </div>
 
-        {/* Panel de Generación Pro */}
-        <div className="lg:col-span-3">
-          <div className="bg-white p-12 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center space-y-10 min-h-[500px]">
-            <div className="relative">
-              <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100">
-                <FileBarChart className="w-10 h-10 text-indigo-600" />
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center border-4 border-white">
-                <CheckCircle2 className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Datos Sincronizados</h2>
-              <p className="text-sm font-bold text-slate-400">
-                Se han identificado <span className="text-indigo-600 px-2 py-0.5 bg-indigo-50 rounded mx-1">{monitoreos.length} registros</span> listos para ser procesados.
-              </p>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
+          <ExportarExcel monitoreos={monitoreos} />
+          <ExportarPDF monitoreos={monitoreos} />
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-              <ExportarExcel monitoreos={monitoreos} />
-              <ExportarPDF monitoreos={monitoreos} />
-            </div>
-
-            <div className="flex flex-col items-center gap-2 max-w-lg">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
-                El formato Excel incluye una hoja de resumen estadístico por indicador.<br/>
-                El formato PDF genera el documento oficial apto para impresión institucional.
-              </p>
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-2 max-w-lg">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
+            El formato Excel incluye una hoja de resumen estadístico por indicador.<br/>
+            El formato PDF genera el documento oficial apto para impresión institucional.
+          </p>
         </div>
       </div>
     </div>

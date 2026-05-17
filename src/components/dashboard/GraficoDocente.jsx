@@ -28,7 +28,7 @@ const GraficoDocente = ({ monitoreos }) => {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-[400px]">
       <h3 className="text-lg font-bold text-slate-800 mb-6">Promedio por Docente (Top 10)</h3>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
         <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
           <XAxis type="number" domain={[0, 4]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />

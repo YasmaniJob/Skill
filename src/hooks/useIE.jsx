@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 
 const IEContext = createContext({});
 
@@ -9,25 +9,37 @@ export const IEProvider = ({ children }) => {
 
   const fetchIE = useCallback(async (ieId) => {
     if (!ieId) return null;
-    const { data } = await supabase
-      .from('instituciones_educativas')
-      .select('*')
-      .eq('id', ieId)
-      .single();
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('instituciones')
+        .select('*')
+        .eq('id', ieId)
+        .single();
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching IE:', error);
+      return null;
+    }
   }, []);
 
   const refreshIes = useCallback(async () => {
-    const { data } = await supabase
-      .from('instituciones_educativas')
-      .select('id, nombre, codigo_minedu, estado')
-      .order('nombre', { ascending: true });
-    setIesDisponibles(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('instituciones')
+        .select('*')
+        .order('nombre');
+      if (error) throw error;
+      setIesDisponibles(data || []);
+    } catch (error) {
+      console.error('Error refreshing IEs:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
     refreshIes();
-    setLoading(false);
   }, [refreshIes]);
 
   return (

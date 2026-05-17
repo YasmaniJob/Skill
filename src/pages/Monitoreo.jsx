@@ -25,9 +25,6 @@ const Monitoreo = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Monitorear</h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Nueva observación pedagógica en el aula
-          </p>
         </div>
 
         {/* Periodo en el Header - Premium Select */}
